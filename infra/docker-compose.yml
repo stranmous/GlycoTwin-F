@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: glycotwin-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: glycotwin
+      POSTGRES_PASSWORD: glycotwin
+      POSTGRES_DB: glycotwin
+    ports:
+      - "5432:5432"
+    volumes:
+      - glycotwin_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U glycotwin"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  glycotwin_pg:

@@ -1,0 +1,23 @@
+{
+  "name": "@glycotwin/launch-video",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio src/index.ts --port 3000 --host 0.0.0.0",
+    "still": "remotion still src/index.ts GlycoTwinLaunch out/still.png --scale=0.25",
+    "render": "remotion render src/index.ts GlycoTwinLaunch out/glycotwin-launch.mp4",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.457",
+    "@remotion/media": "^4.0.457",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "remotion": "^4.0.457"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
+    "typescript": "^5.5.4"
+  }
+}

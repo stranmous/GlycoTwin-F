@@ -1,0 +1,198 @@
+{
+  "app": {
+    "name": "GlycoTwin",
+    "tagline": "Know your glucose. Own your health."
+  },
+  "common": {
+    "continue": "Continue",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loading": "Loading…",
+    "retry": "Retry",
+    "back": "Back",
+    "done": "Done",
+    "close": "Close",
+    "skip": "Skip",
+    "next": "Next",
+    "yes": "Yes",
+    "no": "No",
+    "of": "of"
+  },
+  "auth": {
+    "welcomeTitle": "GlycoTwin",
+    "welcomeBody": "Your Personalized AI Digital Twin for Blood Glucose Control",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "getStarted": "Get Started",
+    "haveAccount": "Already have an account?",
+    "signInTitle": "Welcome back",
+    "signUpTitle": "Create account",
+    "email": "Email address",
+    "password": "Password",
+    "continueWithGoogle": "Continue with Google",
+    "or": "or",
+    "signOut": "Sign Out",
+    "errors": {
+      "required": "Please fill in all fields.",
+      "weakPassword": "Password must be at least 8 characters.",
+      "invalidEmail": "Please enter a valid email address."
+    }
+  },
+  "consent": {
+    "title": "Before we begin",
+    "body": "GlycoTwin provides educational glucose estimates only. It is not a medical device and cannot diagnose, treat, or give dosage advice. Always consult your healthcare team.",
+    "checkbox": "I understand this app is for informational purposes only.",
+    "agree": "I Agree, Continue"
+  },
+  "profile": {
+    "title": "Your profile",
+    "subtitle": "Help us personalise your estimates",
+    "age": "Age",
+    "sex": "Sex",
+    "sexMale": "Male",
+    "sexFemale": "Female",
+    "sexOther": "Other",
+    "heightCm": "Height (cm)",
+    "weightKg": "Weight (kg)",
+    "diabetesType": "Diabetes type",
+    "type1": "Type 1",
+    "type2": "Type 2",
+    "gestational": "Gestational",
+    "prediabetes": "Pre-diabetes",
+    "none": "None",
+    "timezone": "Timezone"
+  },
+  "medications": {
+    "title": "Medications",
+    "subtitle": "Optional — for context only",
+    "name": "Medication name",
+    "dose": "Dose / strength",
+    "schedule": "Schedule",
+    "notes": "Notes",
+    "add": "Add medication",
+    "empty": "No medications added"
+  },
+  "language": {
+    "title": "Language",
+    "subtitle": "Choose your preferred language",
+    "english": "English",
+    "urdu": "اردو"
+  },
+  "tabs": {
+    "today": "Today",
+    "insights": "Insights",
+    "scan": "Scan",
+    "simulation": "Simulate",
+    "coach": "Coach"
+  },
+  "today": {
+    "greeting": "Good morning",
+    "goodMorning": "Good morning",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
+    "twinStable": "Twin stable",
+    "meals": "Meals",
+    "todaysMeals": "Today's meals",
+    "carbs": "carbs",
+    "kcal": "kcal",
+    "noMealsTitle": "Log your first meal",
+    "noMealsBody": "Take a photo of your food and we'll estimate the carbs and predict your glucose response.",
+    "viewAll": "View all"
+  },
+  "scan": {
+    "title": "Scan Meal",
+    "tip": "Point at your plate — include all items",
+    "openCamera": "Take Photo",
+    "fromGallery": "Choose from Gallery",
+    "uploading": "Uploading…",
+    "analyzing": "Analysing your meal…",
+    "failedTitle": "Scan failed",
+    "failedBody": "We couldn't process your photo. Please try again.",
+    "tryAgain": "Try Again",
+    "useThisPhoto": "Use This Photo",
+    "retake": "Retake"
+  },
+  "result": {
+    "title": "Detected Foods",
+    "confidence": "Confidence",
+    "totalCarbs": "Total Carbs",
+    "addItem": "Add Item",
+    "save": "Save Meal",
+    "discard": "Discard",
+    "portion": "Portion",
+    "grams": "g"
+  },
+  "insights": {
+    "title": "Insights",
+    "tirTitle": "Time in Range",
+    "tirRange": "70–180 mg/dL",
+    "inRange": "In range",
+    "above": "Above",
+    "below": "Below",
+    "topSpikes": "Biggest spikes",
+    "byMealType": "Average peak by meal type",
+    "noData": "Log some meals to see your glucose patterns here.",
+    "windowToday": "Today",
+    "window7d": "7 days",
+    "window30d": "30 days"
+  },
+  "simulation": {
+    "title": "Simulate",
+    "subtitle": "Educational simulation only.",
+    "baseline": "Baseline",
+    "simulated": "Simulated",
+    "targetBand": "Target 70–180 mg/dL",
+    "predictedPeak": "Predicted peak",
+    "selectMeal": "Select a meal",
+    "noMeal": "No meal selected",
+    "controls": "Adjust scenario",
+    "portionScale": "Portion size",
+    "walkMinutes": "Walk after eating",
+    "timing": "Eat",
+    "intensity": "Intensity",
+    "intensityLight": "Light",
+    "intensityModerate": "Moderate",
+    "min30": "30 min later",
+    "min60": "60 min later",
+    "now": "Now",
+    "deltaPeak": "Peak change",
+    "tar": "Time above range"
+  },
+  "coach": {
+    "title": "AI Coach",
+    "subtitle": "Educational guidance only — not medical advice",
+    "placeholder": "Ask about food, walking, or trends…",
+    "send": "Send",
+    "refusalDosage": "I can't recommend dosages. Please speak with your doctor.",
+    "refusalDiagnosis": "I can't provide a diagnosis. A doctor can.",
+    "refusalEmergency": "Please call your local emergency number immediately.",
+    "tryAsking": "Try asking:",
+    "suggestion1": "What foods tend to spike my glucose?",
+    "suggestion2": "How does walking after a meal help?",
+    "suggestion3": "Show me my time-in-range trend",
+    "voiceTip": "Tip: Use your keyboard's microphone to speak in Urdu."
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "language": "Language",
+    "theme": "Appearance",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "privacy": "Privacy",
+    "dataImport": "Import Data",
+    "signOut": "Sign Out",
+    "appVersion": "Version"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Check your connection.",
+    "offline": "You're offline. Some features require a connection."
+  },
+  "safety": {
+    "educationalOnly": "Educational simulation only"
+  }
+}

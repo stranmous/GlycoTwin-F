@@ -1,0 +1,31 @@
+# node
+node_modules/
+.expo/
+dist/
+*.log
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.uv/
+.pytest_cache/
+.mypy_cache/
+
+# env / secrets
+firebase-service-account.json
+google-services.json
+GoogleService-Info.plist
+
+# editor / tools
+.vscode/
+.idea/
+.DS_Store
+.playwright-mcp/
+
+# build
+build/
+.expo-shared/
+ios/
+android/
+*.tsbuildinfo

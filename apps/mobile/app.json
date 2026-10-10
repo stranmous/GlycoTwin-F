@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "GlycoTwin",
+    "slug": "glycotwin",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "glycotwin",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.glycotwin.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "GlycoTwin uses your camera to scan meals and estimate carbohydrates.",
+        "NSPhotoLibraryUsageDescription": "GlycoTwin needs access to your photos so you can pick meal images from your gallery."
+      }
+    },
+    "android": {
+      "package": "com.glycotwin.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F766E"
+      },
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single"
+    },
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F7FAFC"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-camera",
+        { "cameraPermission": "Allow GlycoTwin to access your camera." }
+      ],
+      [
+        "expo-image-picker",
+        { "photosPermission": "Allow GlycoTwin to access your photos." }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": { "origin": false }
+    }
+  }
+}
