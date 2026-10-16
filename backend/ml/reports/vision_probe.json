@@ -1,0 +1,31 @@
+{
+  "photos": [
+    "/tmp/d1namo_pics/diabetes_subset_pictures-glucose-food-insulin/001/food_pictures/001.jpg",
+    "/tmp/d1namo_pics/diabetes_subset_pictures-glucose-food-insulin/001/food_pictures/002.jpg",
+    "/tmp/d1namo_pics/diabetes_subset_pictures-glucose-food-insulin/001/food_pictures/003.jpg",
+    "/tmp/d1namo_pics/diabetes_subset_pictures-glucose-food-insulin/001/food_pictures/004.jpg",
+    "/tmp/d1namo_pics/diabetes_subset_pictures-glucose-food-insulin/001/food_pictures/005.jpg",
+    "/tmp/d1namo_pics/diabetes_subset_pictures-glucose-food-insulin/001/food_pictures/006.jpg"
+  ],
+  "n_photos": 6,
+  "fastsam_load_s": 0.4,
+  "fastsam": {
+    "model": "weights/FastSAM-s.pt",
+    "latency_ms_mean": 532.9,
+    "latency_ms_p95": 984.3,
+    "masks_per_image": [
+      32,
+      35,
+      23,
+      35,
+      105,
+      75
+    ]
+  },
+  "depth_load_s": 42.8,
+  "depth": {
+    "model": "depth-anything/Depth-Anything-V2-Small-hf",
+    "latency_ms_mean": 6393.6,
+    "latency_ms_p95": 7035.5
+  }
+}

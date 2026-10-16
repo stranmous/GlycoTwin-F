@@ -10,38 +10,38 @@ const animations = createAnimations({
   bouncy: { type: 'spring', damping: 10, stiffness: 340, mass: 0.9 },
 });
 
-// Plus Jakarta Sans — headings / buttons
+// Nunito — Warm Companion primary font across headings, body, and numeric readouts
 const headingFont = createFont({
-  family: 'PlusJakartaSans',
+  family: 'Nunito',
   size: {
     1: 11, 2: 12, 3: 13, 4: 14, 5: 16, 6: 18,
-    7: 20, 8: 24, 9: 28, 10: 32, 11: 40, 12: 48,
+    7: 20, 8: 24, 9: 28, 10: 32, 11: 36, 12: 44,
     true: 16,
   },
   lineHeight: {
     1: 14, 2: 16, 3: 18, 4: 20, 5: 22, 6: 24,
-    7: 28, 8: 32, 9: 36, 10: 40, 11: 48, 12: 56,
+    7: 28, 8: 32, 9: 36, 10: 40, 11: 44, 12: 52,
   },
   weight: {
     1: '300', 2: '400', 3: '500', 4: '600',
     5: '700', 6: '800', true: '700',
   },
   letterSpacing: {
-    1: 0.02, 2: 0, 3: -0.01, 4: -0.02, 5: -0.02,
+    1: 0.02, 2: 0, 3: -0.01, 4: -0.02, 5: -0.03,
   },
   face: {
-    300: { normal: 'PlusJakartaSans_300Light' },
-    400: { normal: 'PlusJakartaSans_400Regular' },
-    500: { normal: 'PlusJakartaSans_500Medium' },
-    600: { normal: 'PlusJakartaSans_600SemiBold' },
-    700: { normal: 'PlusJakartaSans_700Bold' },
-    800: { normal: 'PlusJakartaSans_800ExtraBold' },
+    300: { normal: 'Nunito_300Light' },
+    400: { normal: 'Nunito_400Regular' },
+    500: { normal: 'Nunito_500Medium' },
+    600: { normal: 'Nunito_600SemiBold' },
+    700: { normal: 'Nunito_700Bold' },
+    800: { normal: 'Nunito_800ExtraBold' },
+    900: { normal: 'Nunito_900Black' },
   },
 });
 
-// Space Grotesk — body / data / labels
 const bodyFont = createFont({
-  family: 'SpaceGrotesk',
+  family: 'Nunito',
   size: {
     1: 11, 2: 12, 3: 13, 4: 14, 5: 15, 6: 16,
     7: 18, 8: 20, 9: 24, 10: 28,
@@ -55,77 +55,77 @@ const bodyFont = createFont({
     1: '300', 2: '400', 3: '500', 4: '600', 5: '700', true: '400',
   },
   letterSpacing: {
-    1: 0.05, 2: 0.02, 3: 0, 4: 0, 5: -0.01,
+    1: 0.02, 2: 0.01, 3: 0, 4: 0, 5: -0.01,
   },
   face: {
-    300: { normal: 'SpaceGrotesk_300Light' },
-    400: { normal: 'SpaceGrotesk_400Regular' },
-    500: { normal: 'SpaceGrotesk_500Medium' },
-    600: { normal: 'SpaceGrotesk_600SemiBold' },
-    700: { normal: 'SpaceGrotesk_700Bold' },
+    300: { normal: 'Nunito_300Light' },
+    400: { normal: 'Nunito_400Regular' },
+    500: { normal: 'Nunito_500Medium' },
+    600: { normal: 'Nunito_600SemiBold' },
+    700: { normal: 'Nunito_700Bold' },
+    800: { normal: 'Nunito_800ExtraBold' },
+    900: { normal: 'Nunito_900Black' },
   },
 });
 
-// ── Vibrant Vitality palette ─────────────────────────────────────────────────
+// ── Warm Companion palette ───────────────────────────────────────────────────
 const palette = {
-  // Primary — mint teal
-  mint50:  '#ECFDF9',
-  mint100: '#C7FAF3',
-  mint200: '#90F5E8',
-  mint300: '#4DE8D8',
-  mint400: '#2DD4BF',  // ← Stitch primary / brand
-  mint500: '#0FBFAB',
-  mint600: '#009A8A',
-  mint700: '#006b5f',  // ← dark primary
-  mint800: '#004D45',
-  mint900: '#003330',
+  // Brand & Semantic
+  teal50:          '#EAF7EE',
+  teal100:         '#D4F5E9',  // Mint
+  teal200:         '#A6F0B9',
+  teal300:         '#84F6E6',
+  teal400:         '#66D9CA',
+  teal500:         '#2AA89A',  // Primary warm teal
+  teal600:         '#006A61',  // Deep teal text accent
+  teal700:         '#005048',
+  teal800:         '#003631',
+  teal900:         '#00201C',
 
-  // Secondary — electric blue
-  blue300: '#93C5FD',
-  blue400: '#60A5FA',
-  blue500: '#3B82F6',  // ← Stitch secondary
-  blue600: '#2563EB',
-  blue700: '#0058be',  // ← dark secondary
+  // Soft Sage (in-range 70–180 mg/dL)
+  sage:            '#81C995',
+  sageDark:        '#236B40',
+  sageContainer:   '#A6F0B9',
 
-  // Tertiary / danger — rose
-  rose300: '#FDA4AF',
-  rose400: '#FB7185',
-  rose500: '#F43F5E',  // ← Stitch tertiary
-  rose600: '#E11D48',
-  rose700: '#bc0b3b',
+  // Soft Coral (above-range)
+  coral:           '#FF8A80',
+  coralLight:      '#FFDAD6',
+  coralDark:       '#BA1A1A',
 
-  // Accent — amber (from logo gradient)
-  amber300: '#FCD34D',
-  amber400: '#FBBF24',
-  amber500: '#FFB24C',  // ← logo amber
-  amber600: '#F59E0B',
+  // Warm Amber (educational disclaimers & moderate carbs)
+  amber:           '#FFB347',
+  butter:          '#FFF3CD',
 
-  // Accent — lime (from logo gradient)
-  lime400: '#A7FF3F',   // ← logo lime
+  // Muted Rose (below-range & destructive)
+  rose:            '#E57373',
 
-  // Accent — cyan (from logo gradient)
-  cyan400: '#62F4F1',   // ← logo cyan
+  // Pastel Tints
+  peach:           '#FFE5D9',
+  mint:            '#D4F5E9',
+  lavender:        '#E8DEF8',
 
-  // Neutrals — warm-tinted for the off-white base
-  neutral50:  '#F7F9FB',  // ← Stitch light background
-  neutral100: '#F2F4F6',
-  neutral200: '#E6E8EA',
-  neutral300: '#D8DADC',
-  neutral400: '#BACAC5',
-  neutral500: '#6B7A76',
-  neutral600: '#3C4A46',
-  neutral700: '#26314D',  // ← logo dark stroke
-  neutral800: '#1E293B',
-  neutral850: '#131E2F',
-  neutral900: '#0E1726',  // ← Stitch dark background base
-  neutral950: '#080F1A',
+  // Warm Light Neutrals
+  canvasCream:     '#FFFBF5',  // Primary cream canvas
+  oatFill:         '#FFF5EB',  // Secondary oat container fill
+  surfaceCard:     '#FFFFFF',  // Crisp elevated card
+  charcoalText:    '#3D3D3D',  // Primary text
+  stoneGrayText:   '#8E8E8E',  // Secondary text
+  darkCharcoal:    '#1B1C1C',
+  borderLight:     'rgba(61,61,61,0.06)',
+
+  // Warm Espresso Dark Neutrals
+  darkCanvas:      '#1C1917',  // Espresso dark canvas
+  darkSurface:     '#292524',  // Espresso dark surface
+  darkSurfaceHigh: '#3D3935',
+  darkBorder:      'rgba(255,255,255,0.08)',
+  darkText:        '#F5F5F4',
+  darkTextMuted:   '#A8A29E',
+  darkTextSubtle:  '#78716C',
 
   // Base
-  white: '#FFFFFF',
-  black: '#000000',
-
-  // Onboarding / warm
-  cream: '#FFF8EA',  // ← logo bracket / warm white
+  white:           '#FFFFFF',
+  black:           '#000000',
+  cream:           '#FFF8EA',
 };
 
 const tokens = createTokens({
@@ -140,110 +140,127 @@ const tokens = createTokens({
     8: 40, 9: 48, 10: 64, 11: 80, 12: 96, 13: 112, 14: 128,
     true: 16,
   },
-  // Stitch shape language: pill for buttons, 24px for cards
+  // Warm Companion shape language: full pill (9999px) for buttons/chips, 20-24px for cards
   radius: {
-    0: 0, 1: 6, 2: 10, 3: 14, 4: 18, 5: 22, 6: 24, 7: 32, 8: 9999,
-    true: 18,
+    0: 0, 1: 6, 2: 10, 3: 14, 4: 18, 5: 20, 6: 24, 7: 32, 8: 9999,
+    true: 20,
   },
   zIndex: { 0: 0, 1: 100, 2: 200, 3: 300, 4: 400, 5: 500 },
 });
 
-// ── Light theme ──────────────────────────────────────────────────────────────
+// ── Warm Light theme ─────────────────────────────────────────────────────────
 const lightTheme = {
-  background:        palette.neutral50,
-  backgroundHover:   palette.neutral100,
-  backgroundPress:   palette.neutral200,
+  background:        palette.canvasCream,      // #FFFBF5
+  backgroundHover:   palette.oatFill,          // #FFF5EB
+  backgroundPress:   '#FCEFE2',
+  backgroundPrimary: palette.canvasCream,
+  backgroundSecondary: palette.oatFill,
 
-  // Glass / card surfaces
-  surface:           palette.white,
-  surfaceMuted:      palette.neutral100,
-  surfaceGlass:      'rgba(255,255,255,0.72)',
-  surfaceGlassDim:   'rgba(255,255,255,0.45)',
+  surface:           palette.surfaceCard,      // #FFFFFF
+  surfaceMuted:      palette.oatFill,          // #FFF5EB
+  surfaceCard:       palette.surfaceCard,
+  surfaceGlass:      'rgba(255,255,255,0.88)',
+  surfaceGlassDim:   'rgba(255,255,255,0.65)',
 
-  borderColor:       palette.neutral400,
-  borderGlass:       'rgba(255,255,255,0.6)',
+  borderColor:       palette.borderLight,      // rgba(61,61,61,0.06)
+  borderGlass:       'rgba(61,61,61,0.08)',
 
-  color:             palette.neutral700,       // on-surface text (dark, not pure black)
-  colorMuted:        palette.neutral500,
-  colorSubtle:       palette.neutral400,
+  color:             palette.charcoalText,     // #3D3D3D
+  colorMuted:        palette.stoneGrayText,    // #8E8E8E
+  colorSubtle:       '#A8A8A8',
   colorOnDark:       palette.cream,
 
-  // Primary — mint teal
-  primary:           palette.mint400,
-  primaryDark:       palette.mint700,
-  primaryPress:      palette.mint500,
-  primarySoft:       palette.mint50,
-  primaryGlass:      'rgba(45,212,191,0.15)',
+  // Primary — Warm Teal
+  primary:           palette.teal500,          // #2AA89A
+  primaryDark:       palette.teal600,          // #006A61
+  primaryPress:      '#238E82',
+  primarySoft:       palette.mint,             // #D4F5E9
+  primaryGlass:      'rgba(42,168,154,0.12)',
   onPrimary:         palette.white,
 
-  // Secondary — electric blue
-  secondary:         palette.blue500,
-  secondaryPress:    palette.blue600,
-  secondarySoft:     'rgba(59,130,246,0.1)',
+  // Secondary — Deep Sage
+  secondary:         palette.sageDark,         // #236B40
+  secondaryPress:    '#1B5231',
+  secondarySoft:     palette.mint,
   onSecondary:       palette.white,
 
-  // Status / accents
-  success:           palette.mint400,
-  warn:              palette.amber500,
-  danger:            palette.rose500,
-  dangerSoft:        'rgba(244,63,94,0.1)',
+  // Status & Range
+  success:           palette.sage,             // #81C995 (in-range 70-180)
+  warn:              palette.amber,            // #FFB347 (caution / moderate carbs)
+  danger:            palette.rose,             // #E57373 (below-range / destructive)
+  dangerSoft:        '#FFEBEA',
 
-  // Logo accent colors
-  accentCyan:        palette.cyan400,
-  accentLime:        palette.lime400,
-  accentAmber:       palette.amber500,
+  rangeAbove:        palette.coral,            // #FF8A80
+  rangeWarning:      palette.amber,            // #FFB347
+  rangeBelow:        palette.rose,             // #E57373
+  rangeInRange:      palette.sage,             // #81C995
 
-  // Shadows (colored glow)
-  shadowColor:       'rgba(15, 23, 42, 0.08)',
-  shadowPrimary:     'rgba(45,212,191,0.3)',
-  shadowBlue:        'rgba(59,130,246,0.25)',
-  shadowRose:        'rgba(244,63,94,0.25)',
+  // Pastels
+  pastelPeach:       palette.peach,            // #FFE5D9
+  pastelMint:        palette.mint,             // #D4F5E9
+  pastelButter:      palette.butter,           // #FFF3CD
+  pastelLavender:    palette.lavender,         // #E8DEF8
+
+  // Diffused Warm Shadows
+  shadowColor:       'rgba(61,61,61,0.06)',
+  shadowPrimary:     'rgba(42,168,154,0.25)',
+  shadowBlue:        'rgba(42,168,154,0.18)',
+  shadowRose:        'rgba(229,115,115,0.22)',
 };
 
-// ── Dark theme ───────────────────────────────────────────────────────────────
+// ── Warm Espresso Dark theme ─────────────────────────────────────────────────
 const darkTheme = {
-  background:        palette.neutral900,
-  backgroundHover:   palette.neutral850,
-  backgroundPress:   palette.neutral800,
+  background:        palette.darkCanvas,       // #1C1917
+  backgroundHover:   '#24201E',
+  backgroundPress:   '#2E2A27',
+  backgroundPrimary: palette.darkCanvas,
+  backgroundSecondary: palette.darkSurface,
 
-  surface:           palette.neutral850,
-  surfaceMuted:      palette.neutral800,
-  surfaceGlass:      'rgba(14,23,38,0.72)',
-  surfaceGlassDim:   'rgba(14,23,38,0.5)',
+  surface:           palette.darkSurface,      // #292524
+  surfaceMuted:      palette.darkSurfaceHigh,  // #3D3935
+  surfaceCard:       palette.darkSurface,
+  surfaceGlass:      'rgba(41,37,36,0.85)',
+  surfaceGlassDim:   'rgba(41,37,36,0.65)',
 
-  borderColor:       'rgba(186,202,197,0.15)',
-  borderGlass:       'rgba(255,255,255,0.1)',
+  borderColor:       palette.darkBorder,
+  borderGlass:       'rgba(255,255,255,0.06)',
 
-  color:             palette.neutral200,
-  colorMuted:        palette.neutral500,
-  colorSubtle:       'rgba(186,202,197,0.5)',
+  color:             palette.darkText,         // #F5F5F4
+  colorMuted:        palette.darkTextMuted,    // #A8A29E
+  colorSubtle:       palette.darkTextSubtle,
   colorOnDark:       palette.cream,
 
-  primary:           palette.mint400,
-  primaryDark:       palette.mint300,
-  primaryPress:      palette.mint500,
-  primarySoft:       'rgba(45,212,191,0.15)',
-  primaryGlass:      'rgba(45,212,191,0.12)',
-  onPrimary:         palette.neutral950,
+  primary:           palette.teal500,          // #2AA89A
+  primaryDark:       palette.teal400,
+  primaryPress:      '#238E82',
+  primarySoft:       'rgba(42,168,154,0.18)',
+  primaryGlass:      'rgba(42,168,154,0.12)',
+  onPrimary:         palette.white,
 
-  secondary:         palette.blue400,
-  secondaryPress:    palette.blue500,
-  secondarySoft:     'rgba(96,165,250,0.12)',
-  onSecondary:       palette.neutral950,
+  secondary:         palette.sage,
+  secondaryPress:    '#6AB07E',
+  secondarySoft:     'rgba(129,201,149,0.15)',
+  onSecondary:       palette.darkCanvas,
 
-  success:           palette.mint400,
-  warn:              palette.amber500,
-  danger:            palette.rose400,
-  dangerSoft:        'rgba(251,113,133,0.12)',
+  success:           palette.sage,
+  warn:              palette.amber,
+  danger:            palette.rose,
+  dangerSoft:        'rgba(229,115,115,0.15)',
 
-  accentCyan:        palette.cyan400,
-  accentLime:        palette.lime400,
-  accentAmber:       palette.amber500,
+  rangeAbove:        palette.coral,
+  rangeWarning:      palette.amber,
+  rangeBelow:        palette.rose,
+  rangeInRange:      palette.sage,
+
+  pastelPeach:       '#3D2F28',
+  pastelMint:        '#1D352E',
+  pastelButter:      '#38321F',
+  pastelLavender:    '#2E253A',
 
   shadowColor:       'rgba(0,0,0,0.5)',
-  shadowPrimary:     'rgba(45,212,191,0.35)',
-  shadowBlue:        'rgba(96,165,250,0.3)',
-  shadowRose:        'rgba(251,113,133,0.3)',
+  shadowPrimary:     'rgba(42,168,154,0.25)',
+  shadowBlue:        'rgba(42,168,154,0.2)',
+  shadowRose:        'rgba(229,115,115,0.25)',
 };
 
 // ── Config ───────────────────────────────────────────────────────────────────

@@ -1,0 +1,1389 @@
+{
+ "schema_version": "1.0",
+ "data_version": "pakistan-curated-v1.1",
+ "status": "provisional",
+ "sources": [
+  {
+   "source_id": "usda_fdc",
+   "title": "USDA FoodData Central",
+   "publisher": "U.S. Department of Agriculture",
+   "url": "https://fdc.nal.usda.gov/",
+   "license": "public domain (CC0)",
+   "commercial_use": "confirmed",
+   "record_status": "approved",
+   "accessed_on": "2026-10-10",
+   "transformation": "Reference per-100g values for comparable dishes and ingredients; Pakistani mixed dishes mapped to closest standard entries and adjusted for typical recipes."
+  },
+  {
+   "source_id": "pk_fct",
+   "title": "Food Composition Table for Pakistan",
+   "publisher": "FAO INFOODS / University of Agriculture Faisalabad",
+   "url": "https://www.fao.org/infoods/infoods/en/",
+   "license": "research use",
+   "commercial_use": "unknown",
+   "record_status": "candidate",
+   "accessed_on": "2026-10-10",
+   "transformation": "Regional cross-check source for local dishes; full extraction pending the weighed-portion study."
+  }
+ ],
+ "taxonomy": [
+  {
+   "id": "biryani_generic",
+   "names": {
+    "english": "Biryani",
+    "urdu": "بریانی",
+    "roman_urdu": "biryani"
+   },
+   "aliases": [
+    "biryani",
+    "chicken biryani",
+    "sindhi biryani"
+   ],
+   "category": "rice_dishes",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "biryani_rice_visible",
+   "names": {
+    "english": "Biryani rice",
+    "urdu": "بریانی چاول",
+    "roman_urdu": "biryani chawal"
+   },
+   "aliases": [
+    "biryani rice"
+   ],
+   "category": "rice_dishes",
+   "kind": "component",
+   "parent_id": "biryani_generic",
+   "observation_mode": "either"
+  },
+  {
+   "id": "biryani_potato_occluded",
+   "names": {
+    "english": "Biryani potato",
+    "urdu": "بریانی آلو",
+    "roman_urdu": "biryani aloo"
+   },
+   "aliases": [
+    "biryani potato"
+   ],
+   "category": "rice_dishes",
+   "kind": "component",
+   "parent_id": "biryani_generic",
+   "observation_mode": "either"
+  },
+  {
+   "id": "pulao",
+   "names": {
+    "english": "Pulao",
+    "urdu": "پلاؤ",
+    "roman_urdu": "pulao"
+   },
+   "aliases": [
+    "pulao",
+    "yakhni pulao",
+    "chicken pulao"
+   ],
+   "category": "rice_dishes",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "cooked_rice",
+   "names": {
+    "english": "Cooked rice",
+    "urdu": "چاول",
+    "roman_urdu": "chawal"
+   },
+   "aliases": [
+    "rice",
+    "chawal",
+    "boiled rice",
+    "white rice"
+   ],
+   "category": "rice_dishes",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "chicken_karahi",
+   "names": {
+    "english": "Chicken karahi",
+    "urdu": "چکن کڑاہی",
+    "roman_urdu": "chicken karahi"
+   },
+   "aliases": [
+    "karahi",
+    "chicken karahi",
+    "karahi gosht"
+   ],
+   "category": "curries",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "chicken_curry_generic",
+   "names": {
+    "english": "Chicken curry",
+    "urdu": "چکن سالن",
+    "roman_urdu": "chicken salan"
+   },
+   "aliases": [
+    "chicken curry",
+    "salan",
+    "chicken salan"
+   ],
+   "category": "curries",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "chicken_handi",
+   "names": {
+    "english": "Chicken handi",
+    "urdu": "چکن ہانڈی",
+    "roman_urdu": "chicken handi"
+   },
+   "aliases": [
+    "handi",
+    "chicken handi"
+   ],
+   "category": "curries",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "nihari",
+   "names": {
+    "english": "Nihari",
+    "urdu": "نہاری",
+    "roman_urdu": "nihari"
+   },
+   "aliases": [
+    "nihari",
+    "beef nihari"
+   ],
+   "category": "curries",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "haleem",
+   "names": {
+    "english": "Haleem",
+    "urdu": "حلیم",
+    "roman_urdu": "haleem"
+   },
+   "aliases": [
+    "haleem"
+   ],
+   "category": "curries",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "keema",
+   "names": {
+    "english": "Keema",
+    "urdu": "قیمہ",
+    "roman_urdu": "keema"
+   },
+   "aliases": [
+    "keema",
+    "qeema",
+    "mince",
+    "beef keema"
+   ],
+   "category": "curries",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "aloo_gosht",
+   "names": {
+    "english": "Aloo gosht",
+    "urdu": "آلو گوشت",
+    "roman_urdu": "aloo gosht"
+   },
+   "aliases": [
+    "aloo gosht",
+    "aloo gosht shorba"
+   ],
+   "category": "curries",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "chicken_tikka",
+   "names": {
+    "english": "Chicken tikka",
+    "urdu": "چکن ٹکا",
+    "roman_urdu": "chicken tikka"
+   },
+   "aliases": [
+    "tikka",
+    "chicken tikka"
+   ],
+   "category": "grilled",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "seekh_kebab",
+   "names": {
+    "english": "Seekh kebab",
+    "urdu": "سیخ کباب",
+    "roman_urdu": "seekh kebab"
+   },
+   "aliases": [
+    "kebab",
+    "seekh kebab",
+    "kabab"
+   ],
+   "category": "grilled",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "daal_generic",
+   "names": {
+    "english": "Daal",
+    "urdu": "دال",
+    "roman_urdu": "daal"
+   },
+   "aliases": [
+    "daal",
+    "dal",
+    "lentils",
+    "masoor daal",
+    "daal chawal"
+   ],
+   "category": "lentils",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "chana_masala",
+   "names": {
+    "english": "Chana masala",
+    "urdu": "چنا مسالہ",
+    "roman_urdu": "chana masala"
+   },
+   "aliases": [
+    "chana",
+    "chana masala",
+    "cholay",
+    "chickpeas"
+   ],
+   "category": "lentils",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "roti_generic",
+   "names": {
+    "english": "Roti",
+    "urdu": "روٹی",
+    "roman_urdu": "roti"
+   },
+   "aliases": [
+    "roti",
+    "chapati",
+    "phulka"
+   ],
+   "category": "breads",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "naan",
+   "names": {
+    "english": "Naan",
+    "urdu": "نان",
+    "roman_urdu": "naan"
+   },
+   "aliases": [
+    "naan",
+    "roghni naan"
+   ],
+   "category": "breads",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "paratha",
+   "names": {
+    "english": "Paratha",
+    "urdu": "پراٹھا",
+    "roman_urdu": "paratha"
+   },
+   "aliases": [
+    "paratha",
+    "pratha"
+   ],
+   "category": "breads",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "samosa",
+   "names": {
+    "english": "Samosa",
+    "urdu": "سموسہ",
+    "roman_urdu": "samosa"
+   },
+   "aliases": [
+    "samosa",
+    "aloo samosa"
+   ],
+   "category": "fried_snacks",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "pakora",
+   "names": {
+    "english": "Pakora",
+    "urdu": "پکوڑا",
+    "roman_urdu": "pakora"
+   },
+   "aliases": [
+    "pakora",
+    "pakoday",
+    "bhajia"
+   ],
+   "category": "fried_snacks",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "mixed_sabzi",
+   "names": {
+    "english": "Mixed sabzi",
+    "urdu": "سبزی",
+    "roman_urdu": "sabzi"
+   },
+   "aliases": [
+    "sabzi",
+    "mixed vegetables",
+    "sabzi salan"
+   ],
+   "category": "vegetables",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "baingan_bharta",
+   "names": {
+    "english": "Baingan bharta",
+    "urdu": "بینگن بھرتہ",
+    "roman_urdu": "baingan bharta"
+   },
+   "aliases": [
+    "baingan",
+    "bharta",
+    "baingan bharta"
+   ],
+   "category": "vegetables",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "raita",
+   "names": {
+    "english": "Raita",
+    "urdu": "رائتہ",
+    "roman_urdu": "raita"
+   },
+   "aliases": [
+    "raita",
+    "dahi raita"
+   ],
+   "category": "dairy_sides",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "kheer",
+   "names": {
+    "english": "Kheer",
+    "urdu": "کھیر",
+    "roman_urdu": "kheer"
+   },
+   "aliases": [
+    "kheer"
+   ],
+   "category": "desserts",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "gulab_jamun",
+   "names": {
+    "english": "Gulab jamun",
+    "urdu": "گلاب جامن",
+    "roman_urdu": "gulab jamun"
+   },
+   "aliases": [
+    "gulab jamun",
+    "jamun"
+   ],
+   "category": "desserts",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "chai",
+   "names": {
+    "english": "Chai",
+    "urdu": "چائے",
+    "roman_urdu": "chai"
+   },
+   "aliases": [
+    "chai",
+    "tea",
+    "doodh patti",
+    "chai doodh patti"
+   ],
+   "category": "drinks",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "lassi",
+   "names": {
+    "english": "Lassi",
+    "urdu": "لسی",
+    "roman_urdu": "lassi"
+   },
+   "aliases": [
+    "lassi",
+    "sweet lassi",
+    "meethi lassi"
+   ],
+   "category": "drinks",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  },
+  {
+   "id": "fried_eggs",
+   "names": {
+    "english": "Fried eggs",
+    "urdu": "تلے ہوئے انڈے",
+    "roman_urdu": "anday fry"
+   },
+   "aliases": [
+    "fried egg",
+    "fried eggs",
+    "anda fry",
+    "anday fry",
+    "egg fry"
+   ],
+   "category": "egg_dishes",
+   "kind": "dish",
+   "parent_id": null,
+   "observation_mode": "either"
+  }
+ ],
+ "nutrition_profiles": [
+  {
+   "food_id": "biryani_generic",
+   "nutrients_per_100g": {
+    "calories_kcal": 160,
+    "carbs_g": 22,
+    "protein_g": 6,
+    "fat_g": 5.5,
+    "fiber_g": 1.5
+   },
+   "density_g_per_ml": 0.75,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "biryani_rice_visible",
+   "nutrients_per_100g": {
+    "calories_kcal": 140,
+    "carbs_g": 26,
+    "protein_g": 3,
+    "fat_g": 2.5,
+    "fiber_g": 0.6
+   },
+   "density_g_per_ml": 0.8,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "biryani_potato_occluded",
+   "nutrients_per_100g": {
+    "calories_kcal": 90,
+    "carbs_g": 17,
+    "protein_g": 2,
+    "fat_g": 1.5,
+    "fiber_g": 2
+   },
+   "density_g_per_ml": 0.85,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "pulao",
+   "nutrients_per_100g": {
+    "calories_kcal": 140,
+    "carbs_g": 24,
+    "protein_g": 4.5,
+    "fat_g": 3,
+    "fiber_g": 0.8
+   },
+   "density_g_per_ml": 0.78,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "cooked_rice",
+   "nutrients_per_100g": {
+    "calories_kcal": 130,
+    "carbs_g": 28,
+    "protein_g": 2.7,
+    "fat_g": 0.3,
+    "fiber_g": 0.4
+   },
+   "density_g_per_ml": 0.8,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 20,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "chicken_karahi",
+   "nutrients_per_100g": {
+    "calories_kcal": 165,
+    "carbs_g": 3,
+    "protein_g": 14,
+    "fat_g": 11,
+    "fiber_g": 0.8
+   },
+   "density_g_per_ml": 0.95,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "chicken_curry_generic",
+   "nutrients_per_100g": {
+    "calories_kcal": 150,
+    "carbs_g": 4,
+    "protein_g": 13,
+    "fat_g": 9,
+    "fiber_g": 1
+   },
+   "density_g_per_ml": 0.98,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "chicken_handi",
+   "nutrients_per_100g": {
+    "calories_kcal": 180,
+    "carbs_g": 4,
+    "protein_g": 13,
+    "fat_g": 12,
+    "fiber_g": 0.6
+   },
+   "density_g_per_ml": 0.97,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "nihari",
+   "nutrients_per_100g": {
+    "calories_kcal": 135,
+    "carbs_g": 4,
+    "protein_g": 10,
+    "fat_g": 9,
+    "fiber_g": 0.7
+   },
+   "density_g_per_ml": 0.98,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "haleem",
+   "nutrients_per_100g": {
+    "calories_kcal": 115,
+    "carbs_g": 12,
+    "protein_g": 7,
+    "fat_g": 4.5,
+    "fiber_g": 2.5
+   },
+   "density_g_per_ml": 1.0,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "keema",
+   "nutrients_per_100g": {
+    "calories_kcal": 175,
+    "carbs_g": 3,
+    "protein_g": 14,
+    "fat_g": 12,
+    "fiber_g": 0.8
+   },
+   "density_g_per_ml": 0.95,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "aloo_gosht",
+   "nutrients_per_100g": {
+    "calories_kcal": 105,
+    "carbs_g": 8,
+    "protein_g": 6,
+    "fat_g": 5.5,
+    "fiber_g": 1.5
+   },
+   "density_g_per_ml": 0.97,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "chicken_tikka",
+   "nutrients_per_100g": {
+    "calories_kcal": 150,
+    "carbs_g": 2,
+    "protein_g": 22,
+    "fat_g": 6,
+    "fiber_g": 0.5
+   },
+   "density_g_per_ml": 0.85,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "seekh_kebab",
+   "nutrients_per_100g": {
+    "calories_kcal": 230,
+    "carbs_g": 3,
+    "protein_g": 15,
+    "fat_g": 17,
+    "fiber_g": 0.8
+   },
+   "density_g_per_ml": 0.9,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "daal_generic",
+   "nutrients_per_100g": {
+    "calories_kcal": 116,
+    "carbs_g": 20,
+    "protein_g": 9,
+    "fat_g": 0.5,
+    "fiber_g": 5
+   },
+   "density_g_per_ml": 0.95,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 25,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "chana_masala",
+   "nutrients_per_100g": {
+    "calories_kcal": 135,
+    "carbs_g": 19,
+    "protein_g": 6,
+    "fat_g": 4,
+    "fiber_g": 5
+   },
+   "density_g_per_ml": 0.95,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "roti_generic",
+   "nutrients_per_100g": {
+    "calories_kcal": 260,
+    "carbs_g": 49,
+    "protein_g": 8,
+    "fat_g": 3.5,
+    "fiber_g": 6
+   },
+   "density_g_per_ml": 0.55,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 20,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "naan",
+   "nutrients_per_100g": {
+    "calories_kcal": 305,
+    "carbs_g": 52,
+    "protein_g": 8,
+    "fat_g": 7,
+    "fiber_g": 2
+   },
+   "density_g_per_ml": 0.5,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 20,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "paratha",
+   "nutrients_per_100g": {
+    "calories_kcal": 290,
+    "carbs_g": 38,
+    "protein_g": 5,
+    "fat_g": 13,
+    "fiber_g": 2.5
+   },
+   "density_g_per_ml": 0.55,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "samosa",
+   "nutrients_per_100g": {
+    "calories_kcal": 260,
+    "carbs_g": 28,
+    "protein_g": 5,
+    "fat_g": 14,
+    "fiber_g": 2.5
+   },
+   "density_g_per_ml": 0.6,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "pakora",
+   "nutrients_per_100g": {
+    "calories_kcal": 275,
+    "carbs_g": 16,
+    "protein_g": 6,
+    "fat_g": 21,
+    "fiber_g": 3
+   },
+   "density_g_per_ml": 0.6,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "mixed_sabzi",
+   "nutrients_per_100g": {
+    "calories_kcal": 65,
+    "carbs_g": 8,
+    "protein_g": 2,
+    "fat_g": 3,
+    "fiber_g": 2.5
+   },
+   "density_g_per_ml": 0.85,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "baingan_bharta",
+   "nutrients_per_100g": {
+    "calories_kcal": 85,
+    "carbs_g": 7,
+    "protein_g": 1.8,
+    "fat_g": 5.5,
+    "fiber_g": 3
+   },
+   "density_g_per_ml": 0.9,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "raita",
+   "nutrients_per_100g": {
+    "calories_kcal": 62,
+    "carbs_g": 4.5,
+    "protein_g": 3,
+    "fat_g": 3.5,
+    "fiber_g": 0
+   },
+   "density_g_per_ml": 1.02,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 20,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "kheer",
+   "nutrients_per_100g": {
+    "calories_kcal": 128,
+    "carbs_g": 20,
+    "protein_g": 3.5,
+    "fat_g": 3.8,
+    "fiber_g": 0.2
+   },
+   "density_g_per_ml": 1.05,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "gulab_jamun",
+   "nutrients_per_100g": {
+    "calories_kcal": 380,
+    "carbs_g": 56,
+    "protein_g": 5,
+    "fat_g": 15,
+    "fiber_g": 0.5
+   },
+   "density_g_per_ml": 0.9,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 30,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "chai",
+   "nutrients_per_100g": {
+    "calories_kcal": 62,
+    "carbs_g": 9,
+    "protein_g": 2,
+    "fat_g": 2,
+    "fiber_g": 0
+   },
+   "density_g_per_ml": 1.0,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 25,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "lassi",
+   "nutrients_per_100g": {
+    "calories_kcal": 92,
+    "carbs_g": 13,
+    "protein_g": 3,
+    "fat_g": 3,
+    "fiber_g": 0
+   },
+   "density_g_per_ml": 1.03,
+   "preparation_assumptions": [
+    "Typical home/restaurant preparation; oil quantity is the main variable."
+   ],
+   "uncertainty": {
+    "relative_percent": 25,
+    "variation_notes": [
+     "Recipe-to-recipe variation is expected; values are reference estimates."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "Reference per-100g values mapped from standard food-composition data to the typical Pakistani preparation; local verification pending the weighed-portion study.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  },
+  {
+   "food_id": "fried_eggs",
+   "nutrients_per_100g": {
+    "calories_kcal": 196,
+    "carbs_g": 1.19,
+    "protein_g": 13.61,
+    "fat_g": 14.84,
+    "fiber_g": 0
+   },
+   "density_g_per_ml": 1.0,
+   "preparation_assumptions": [
+    "Whole chicken egg fried in added cooking fat; no breading, sauce, or side dishes."
+   ],
+   "uncertainty": {
+    "relative_percent": 45,
+    "variation_notes": [
+     "Added oil or butter and the number of eggs materially change calories and fat.",
+     "Phone-photo portion volume is approximate; use manual logging when the portion or preparation is uncertain."
+    ]
+   },
+   "provenance": {
+    "source_ids": [
+     "usda_fdc"
+    ],
+    "transformation": "USDA FoodData Central whole fried egg values per 100 g; retained as a provisional generic fried-egg profile pending local recipe and weighed-portion validation.",
+    "data_class": "provisional",
+    "review_status": "not_reviewed",
+    "reviewer": null,
+    "reviewed_on": null
+   }
+  }
+ ],
+ "recipe_profiles": []
+}

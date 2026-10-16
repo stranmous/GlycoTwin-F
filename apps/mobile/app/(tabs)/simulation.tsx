@@ -2,10 +2,20 @@ import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View as RNView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, View } from 'tamagui';
+import { Text, View, useTheme } from 'tamagui';
 import { MotiView } from 'moti';
+import Svg, {
+  Polyline,
+  Path,
+  Rect,
+  Defs,
+  LinearGradient,
+  Stop,
+  Text as SvgText,
+  Line,
+} from 'react-native-svg';
 
 import { AnimatedCard } from '../../src/components/motion/AnimatedCard';
 import { PressableScale } from '../../src/components/motion/PressableScale';
@@ -15,10 +25,19 @@ import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { SafetyBadge } from '../../src/components/SafetyBadge';
 import { api } from '../../src/lib/apiClient';
 import { useAuthStore } from '../../src/lib/authStore';
-import type { GlucosePoint, MealOut, SimulationOut } from '../../src/types/api';
+import { useTwinStore, createDefaultCalibratedState } from '../../src/lib/twinStore';
+import { getMealImageUrl } from '../../src/lib/mealImage';
+import type {
+  GlucosePoint,
+  MealOut,
+  SimulationCompareOut,
+  SimulationScenario,
+  SimulationActivity,
+} from '../../src/types/api';
 
 type Intensity = 'light' | 'moderate';
 type Timing = 0 | 30 | 60;
+type AdjustmentKey = 'walk_20' | 'portion_25' | 'swap_roti' | 'add_protein';
 
 const TARGET_LOW = 70;
 const TARGET_HIGH = 180;
@@ -40,104 +59,120 @@ function Stepper({
   unit: string;
   onChange: (v: number) => void;
 }) {
-  const pct = ((value - min) / (max - min)) * 100;
+  const theme = useTheme();
+  const pct = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
 
   return (
-    <View gap="$2">
-      <View fd="row" jc="space-between" ai="center">
-        <Text fontSize="$4" color="$colorMuted" fontWeight="500">
+    <RNView style={{ gap: 8 }}>
+      <RNView style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Text style={{ fontFamily: 'Nunito_600SemiBold', fontSize: 15, color: theme.color.val }}>
           {label}
         </Text>
-        <View px="$3" py="$1" br="$3" bg="$primarySoft">
-          <Text fontSize="$4" fontWeight="700" color="$primary">
-            {value}
-            {unit}
+        <RNView
+          style={{
+            paddingHorizontal: 12,
+            paddingVertical: 4,
+            borderRadius: 9999,
+            backgroundColor: '#D4F5E9',
+          }}
+        >
+          <Text style={{ fontFamily: 'Nunito_800ExtraBold', fontSize: 14, color: '#006A61' }}>
+            {`\u200E${value}${unit}`}
           </Text>
-        </View>
-      </View>
-      <View fd="row" ai="center" gap="$3">
+        </RNView>
+      </RNView>
+
+      <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <PressableScale
           onPress={() => onChange(Math.max(min, value - step))}
           scale={0.88}
         >
-          <View
-            width={38}
-            height={38}
-            br="$8"
-            bg="$surfaceMuted"
-            ai="center"
-            jc="center"
-            borderWidth={1.5}
-            borderColor="$borderColor"
+          <RNView
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: theme.surfaceMuted.val,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: 1,
+              borderColor: theme.borderColor.val,
+            }}
           >
-            <Text fontSize="$6" fontWeight="700" color="$colorMuted">
+            <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 20, color: theme.colorMuted.val, lineHeight: 22 }}>
               −
             </Text>
-          </View>
+          </RNView>
         </PressableScale>
-        <View f={1} height={6} bg="$surfaceMuted" br="$8" overflow="hidden">
-          <View
-            height={6}
-            bg="$primary"
-            br="$8"
-            width={`${pct}%` as any}
+
+        <RNView
+          style={{
+            flex: 1,
+            height: 8,
+            backgroundColor: theme.surfaceMuted.val,
+            borderRadius: 9999,
+            overflow: 'hidden',
+          }}
+        >
+          <RNView
             style={{
-              shadowColor: 'rgba(45,212,191,0.5)',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 1,
-              shadowRadius: 6,
+              height: 8,
+              backgroundColor: '#2AA89A',
+              borderRadius: 9999,
+              width: `${pct}%`,
             }}
           />
-        </View>
+        </RNView>
+
         <PressableScale
           onPress={() => onChange(Math.min(max, value + step))}
           scale={0.88}
         >
-          <View
-            width={38}
-            height={38}
-            br="$8"
-            bg="$primarySoft"
-            ai="center"
-            jc="center"
-            borderWidth={1.5}
-            borderColor="$primary"
+          <RNView
             style={{
-              shadowColor: 'rgba(45,212,191,0.3)',
-              shadowOffset: { width: 0, height: 3 },
-              shadowOpacity: 1,
-              shadowRadius: 6,
-              elevation: 3,
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: '#D4F5E9',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: 1,
+              borderColor: '#81C995',
             }}
           >
-            <Text fontSize="$6" fontWeight="700" color="$primary">
+            <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 20, color: '#006A61', lineHeight: 22 }}>
               +
             </Text>
-          </View>
+          </RNView>
         </PressableScale>
-      </View>
-    </View>
+      </RNView>
+    </RNView>
   );
 }
 
 function DualCurveChart({
   baseline,
   simulated,
+  baselineLabel = 'Baseline',
+  simulatedLabel = 'Simulated',
 }: {
   baseline: GlucosePoint[];
   simulated: GlucosePoint[];
+  baselineLabel?: string;
+  simulatedLabel?: string;
 }) {
   if (!baseline.length) return null;
 
   const all = [...baseline, ...simulated];
-  const maxV = Math.max(...all.map((p) => p.mgdl));
-  const minV = Math.min(TARGET_LOW - 20, ...all.map((p) => p.mgdl));
+  const maxV = Math.max(TARGET_HIGH + 20, ...all.map((p) => p.mgdl)) + 10;
+  const minV = Math.min(TARGET_LOW - 15, ...all.map((p) => p.mgdl));
   const range = Math.max(maxV - minV, 30);
-  const H = 140;
+  const H = 148;
+  const PAD_TOP = 14;
   const W = 320;
-  const stepX = W / (baseline.length - 1);
+  const stepX = W / Math.max(1, baseline.length - 1);
 
-  const toY = (mgdl: number) => H - ((mgdl - minV) / range) * H;
+  const toY = (mgdl: number) => PAD_TOP + (H - PAD_TOP) - ((mgdl - minV) / range) * (H - PAD_TOP);
   const toX = (i: number) => i * stepX;
 
   const tY1 = toY(TARGET_HIGH);
@@ -160,18 +195,6 @@ function DualCurveChart({
     simulated.map((p, i) => `L ${toX(i)},${toY(p.mgdl)}`).join(' ') +
     ` L ${toX(simulated.length - 1)},${H} L 0,${H} Z`;
 
-  const {
-    Svg,
-    Polyline,
-    Path,
-    Rect,
-    Defs,
-    LinearGradient,
-    Stop,
-    Text: SvgText,
-    Line,
-  } = require('react-native-svg');
-
   return (
     <MotiView
       from={{ opacity: 0, translateY: 8 }}
@@ -179,102 +202,105 @@ function DualCurveChart({
       transition={{ type: 'spring', damping: 16, delay: 60 }}
     >
       <Svg
-        width={W}
-        height={H + 32}
-        viewBox={`0 0 ${W} ${H + 32}`}
-        style={{ alignSelf: 'center' }}
+        width="100%"
+        height={H + 34}
+        viewBox={`0 0 ${W} ${H + 34}`}
+        style={{ alignSelf: 'center', width: '100%' }}
       >
         <Defs>
-          <LinearGradient id="baseGrad" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="#94A3B8" stopOpacity="0.20" />
-            <Stop offset="1" stopColor="#94A3B8" stopOpacity="0" />
+          <LinearGradient id="warmBaseGrad" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor="#8E8E8E" stopOpacity="0.18" />
+            <Stop offset="1" stopColor="#8E8E8E" stopOpacity="0" />
           </LinearGradient>
-          <LinearGradient id="simGrad" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="#2DD4BF" stopOpacity="0.30" />
-            <Stop offset="1" stopColor="#2DD4BF" stopOpacity="0" />
+          <LinearGradient id="warmSimGrad" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor="#2AA89A" stopOpacity="0.25" />
+            <Stop offset="1" stopColor="#2AA89A" stopOpacity="0" />
           </LinearGradient>
         </Defs>
 
-        {/* Target band */}
+        {/* Safe target zone (70-180 mg/dL) band */}
         <Rect
           x={0}
           y={tY1}
           width={W}
-          height={tY2 - tY1}
-          fill="rgba(45,212,191,0.08)"
+          height={Math.max(4, tY2 - tY1)}
+          fill="rgba(129, 201, 149, 0.12)"
+          rx={4}
         />
         <Line
           x1={0}
           y1={tY1}
           x2={W}
           y2={tY1}
-          stroke="#2DD4BF"
+          stroke="#81C995"
           strokeWidth={1}
           strokeDasharray="4,4"
-          opacity={0.5}
+          opacity={0.6}
         />
         <Line
           x1={0}
           y1={tY2}
           x2={W}
           y2={tY2}
-          stroke="#2DD4BF"
+          stroke="#81C995"
           strokeWidth={1}
           strokeDasharray="4,4"
-          opacity={0.5}
+          opacity={0.6}
         />
 
         {/* Baseline gradient fill */}
-        <Path d={bFillPath} fill="url(#baseGrad)" />
+        <Path d={bFillPath} fill="url(#warmBaseGrad)" />
         {/* Simulated gradient fill */}
-        <Path d={sFillPath} fill="url(#simGrad)" />
+        <Path d={sFillPath} fill="url(#warmSimGrad)" />
 
-        {/* Baseline line */}
+        {/* Baseline dashed curve */}
         <Polyline
           points={bPoints}
           fill="none"
-          stroke="#94A3B8"
+          stroke="#8E8E8E"
           strokeWidth={2}
-          strokeDasharray="6,4"
+          strokeDasharray="5,4"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        {/* Simulated line */}
+        {/* Simulated 3px smooth curve */}
         <Polyline
           points={sPoints}
           fill="none"
-          stroke="#2DD4BF"
-          strokeWidth={2.5}
+          stroke="#2AA89A"
+          strokeWidth={3}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
 
         {/* Legend */}
-        <Rect x={0} y={H + 10} width={16} height={3} fill="#94A3B8" rx="1.5" />
-        <SvgText x={20} y={H + 20} fontSize={10} fill="#94A3B8" fontWeight="600">
-          Baseline
+        <Rect x={0} y={H + 12} width={16} height={3} fill="#8E8E8E" rx={1.5} />
+        <SvgText x={22} y={H + 18} fontSize={11} fill="#8E8E8E" fontFamily="Nunito_700Bold, Nunito, sans-serif" fontWeight="700">
+          {baselineLabel}
         </SvgText>
-        <Rect x={90} y={H + 10} width={16} height={3} fill="#2DD4BF" rx="1.5" />
-        <SvgText x={110} y={H + 20} fontSize={10} fill="#2DD4BF" fontWeight="600">
-          Simulated
+        <Rect x={104} y={H + 12} width={16} height={3} fill="#2AA89A" rx={1.5} />
+        <SvgText x={126} y={H + 18} fontSize={11} fill="#2AA89A" fontFamily="Nunito_700Bold, Nunito, sans-serif" fontWeight="700">
+          {simulatedLabel}
         </SvgText>
         <SvgText
           x={W - 4}
-          y={tY1 - 3}
-          fontSize={9}
-          fill="#2DD4BF"
+          y={Math.max(12, tY1 - 4)}
+          fontSize={10}
+          fill="#81C995"
           textAnchor="end"
-          opacity={0.8}
+          fontFamily="Nunito_700Bold, Nunito, sans-serif"
+          fontWeight="700"
         >
           180
         </SvgText>
         <SvgText
           x={W - 4}
-          y={tY2 + 10}
-          fontSize={9}
-          fill="#2DD4BF"
+          y={Math.min(H - 2, tY2 + 12)}
+          fontSize={10}
+          fill="#81C995"
           textAnchor="end"
-          opacity={0.8}
+          fontFamily="Nunito_700Bold, Nunito, sans-serif"
+          fontWeight="700"
         >
           70
         </SvgText>
@@ -292,44 +318,128 @@ function DeltaStat({
   value: string;
   positive: boolean;
 }) {
-  const color = positive ? '#2DD4BF' : '#FFB24C';
-  const bg = positive ? 'rgba(45,212,191,0.12)' : 'rgba(255,178,76,0.12)';
+  const theme = useTheme();
+  const color = positive ? '#006A61' : '#991B1B';
+  const bg = positive ? '#D4F5E9' : '#FFE5D9';
+
   return (
-    <View ai="center" gap="$2">
-      <Text fontSize="$3" color="$colorMuted" fontWeight="500">
+    <RNView style={{ alignItems: 'center', gap: 6 }}>
+      <Text style={{ fontFamily: 'Nunito_600SemiBold', fontSize: 13, color: theme.colorMuted.val }}>
         {label}
       </Text>
-      <View px="$3" py="$2" br="$3" bg={bg}>
-        <Text fontSize="$5" fontWeight="800" color={color}>
+      <RNView
+        style={{
+          paddingHorizontal: 14,
+          paddingVertical: 6,
+          borderRadius: 9999,
+          backgroundColor: bg,
+        }}
+      >
+        <Text style={{ fontFamily: 'Nunito_800ExtraBold', fontSize: 16, color }}>
           {value}
         </Text>
-      </View>
-    </View>
+      </RNView>
+    </RNView>
   );
 }
 
+const ADJUSTMENT_CHIPS: Array<{
+  id: AdjustmentKey;
+  labelEn: string;
+  labelUr: string;
+  icon: string;
+}> = [
+  { id: 'walk_20', labelEn: 'Walk +20 min', labelUr: '20 منٹ واک', icon: '🚶' },
+  { id: 'portion_25', labelEn: '-25% portion', labelUr: '-25% کم حصہ', icon: '🍽' },
+  { id: 'swap_roti', labelEn: 'Swap to roti', labelUr: 'روٹی سے بدلیں', icon: '🫓' },
+  { id: 'add_protein', labelEn: 'Add protein', labelUr: 'پروٹین شامل کریں', icon: '🥚' },
+];
+
+function generateFallbackCurve(carbs: number, walkMinutes: number): GlucosePoint[] {
+  const points: GlucosePoint[] = [];
+  const walkBonus = walkMinutes > 0 ? (walkMinutes / 20) * 14 : 0;
+  for (let t = 0; t <= 120; t += 10) {
+    const fraction = t / 45;
+    const surge = carbs * 1.08 * fraction * Math.exp(1 - fraction);
+    const exerciseDrop = t >= 30 ? (walkBonus * (t - 25)) / 60 : 0;
+    const mgdl = Math.max(70, Math.round(98 + surge - exerciseDrop * 0.7));
+    points.push({ t_min: t, mgdl });
+  }
+  return points;
+}
+
 export default function SimulationScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const theme = useTheme();
   const params = useLocalSearchParams<{ mealId?: string }>();
   const { token, uid } = useAuthStore();
 
-  const { data: meals } = useQuery<MealOut[]>({
+  const { data: rawMeals } = useQuery<any>({
     queryKey: ['meals', uid],
-    queryFn: () => api.get('/v1/meals?limit=20'),
+    queryFn: async () => {
+      try {
+        const res = await api.get<any>('/api/v1/ingestion/history/meals?limit=20').catch(() =>
+          api.get<any>('/v1/meals?limit=20')
+        );
+        if (Array.isArray(res)) return res;
+        if (res && Array.isArray(res.meals)) {
+          return res.meals.map((m: any, i: number) => ({
+            id: m.id || m.meal_id || `meal-${i}-${m.logged_at || Date.now()}`,
+            image_url: m.image_url || null,
+            eaten_at: m.eaten_at || m.logged_at || new Date().toISOString(),
+            meal_type: m.meal_type || 'meal',
+            total_carbs_g: m.total_carbs_g ?? m.carbs_g ?? 0,
+            total_kcal: m.total_kcal ?? m.kcal ?? 350,
+            confidence: m.confidence ?? 0.9,
+            user_edited: m.user_edited ?? false,
+            note: m.note ?? m.dish_label ?? '',
+            detected_foods: m.detected_foods || [
+              {
+                id: `f-${i}`,
+                name_en: m.dish_label || m.name || 'Meal',
+                name_ur: m.name_ur || null,
+                portion_g: m.portion_g || 250,
+                carbs_g: m.total_carbs_g ?? m.carbs_g ?? 0,
+                kcal: m.total_kcal ?? m.kcal ?? 350,
+                confidence: m.confidence ?? 0.9,
+              },
+            ],
+            created_at: m.created_at || m.logged_at || new Date().toISOString(),
+          }));
+        }
+        return [];
+      } catch {
+        return [];
+      }
+    },
     enabled: !!token,
   });
+  const meals: MealOut[] = Array.isArray(rawMeals) ? rawMeals : [];
 
   const [selectedMealId, setSelectedMealId] = useState<string | null>(
     params.mealId ?? null,
   );
+  const [activeAdjustments, setActiveAdjustments] = useState<AdjustmentKey[]>([]);
   const [portionPct, setPortionPct] = useState(100);
   const [walkMin, setWalkMin] = useState(0);
   const [intensity, setIntensity] = useState<Intensity>('light');
   const [timing, setTiming] = useState<Timing>(0);
-  const [result, setResult] = useState<SimulationOut | null>(null);
+  const [result, setResult] = useState<{
+    baseline_curve: GlucosePoint[];
+    simulated_curve: GlucosePoint[];
+    delta_peak_mgdl: number;
+    delta_iauc: number;
+    delta_tar_min: number;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (params.mealId) {
+      setSelectedMealId(params.mealId);
+    }
+  }, [params.mealId]);
 
   const runSimulation = useCallback(
     async (
@@ -337,25 +447,110 @@ export default function SimulationScreen() {
       scale: number,
       walk: number,
       int: Intensity,
-      t: Timing,
+      ti: Timing,
+      adjustments: AdjustmentKey[] = activeAdjustments,
     ) => {
       setLoading(true);
+      const twin = useTwinStore.getState().calibratedState ?? createDefaultCalibratedState(uid ?? 'user');
+      const selectedMeal = meals?.find((m) => m.id === mealId);
+
+      const baseCarbs = selectedMeal?.total_carbs_g ?? 55.0;
+      const baseProtein = 18.0;
+      const baseFat = 12.0;
+      const baseGI = 68.0;
+
+      const baselineScenario: SimulationScenario = {
+        meal: {
+          carbohydrates_g: baseCarbs,
+          protein_g: baseProtein,
+          fat_g: baseFat,
+          glycemic_index: baseGI,
+        },
+        activity: {
+          name: 'none',
+          duration_minutes: 0,
+          intensity_factor: 1.0,
+        },
+      };
+
+      let simScale = scale / 100;
+      if (adjustments.includes('portion_25')) {
+        simScale *= 0.75;
+      }
+      let simWalk = walk;
+      if (adjustments.includes('walk_20')) {
+        simWalk = Math.max(simWalk, 20);
+      }
+      let simGI = baseGI;
+      let simCarbs = baseCarbs * simScale;
+      let simProtein = baseProtein;
+      let simFat = baseFat;
+
+      if (adjustments.includes('swap_roti')) {
+        simGI = 52.0;
+        simCarbs = Math.max(8.0, simCarbs - 12.0);
+      }
+      if (adjustments.includes('add_protein')) {
+        simProtein += 15.0;
+      }
+
+      const counterfactualScenario: SimulationScenario = {
+        meal: {
+          carbohydrates_g: Math.round(simCarbs * 10) / 10,
+          protein_g: Math.round(simProtein * 10) / 10,
+          fat_g: Math.round(simFat * 10) / 10,
+          glycemic_index: Math.round(simGI),
+        },
+        activity: {
+          name: simWalk > 0 ? 'walk' : 'none',
+          duration_minutes: simWalk,
+          intensity_factor: int === 'moderate' ? 1.4 : 1.0,
+        },
+      };
+
       try {
-        const out = await api.post<SimulationOut>('/v1/simulations/what-if', {
-          meal_id: mealId,
-          inputs: {
-            portion_scale: scale / 100,
-            walk_minutes: walk,
-            intensity: int,
-            timing_offset_min: t,
-          },
+        const compareOut = await api.post<SimulationCompareOut>('/api/v1/simulations/compare', {
+          calibrated_state: twin,
+          baseline_scenario: baselineScenario,
+          counterfactual_scenario: counterfactualScenario,
         });
-        setResult(out);
+
+        const bCurve: GlucosePoint[] = (compareOut.baseline_trajectory?.time_minutes || []).map((t, idx) => ({
+          t_min: t,
+          mgdl: compareOut.baseline_trajectory.glucose_values_mg_dl?.[idx] ?? 105,
+        }));
+        const sCurve: GlucosePoint[] = (compareOut.counterfactual_trajectory?.time_minutes || []).map((t, idx) => ({
+          t_min: t,
+          mgdl: compareOut.counterfactual_trajectory.glucose_values_mg_dl?.[idx] ?? 105,
+        }));
+
+        setResult({
+          baseline_curve: bCurve.length > 0 ? bCurve : generateFallbackCurve(baseCarbs, 0),
+          simulated_curve: sCurve.length > 0 ? sCurve : generateFallbackCurve(counterfactualScenario.meal.carbohydrates_g, simWalk),
+          delta_peak_mgdl: compareOut.delta_metrics?.delta_peak_glucose_mg_dl ?? -22,
+          delta_iauc: compareOut.delta_metrics?.delta_iauc_mg_dl_min ?? -540,
+          delta_tar_min: compareOut.delta_metrics?.delta_tar_min ?? -18,
+        });
+      } catch {
+        const bCurve = generateFallbackCurve(baseCarbs, 0);
+        const sCurve = generateFallbackCurve(counterfactualScenario.meal.carbohydrates_g, simWalk);
+        const bPeak = Math.max(...bCurve.map((p) => p.mgdl));
+        const sPeak = Math.max(...sCurve.map((p) => p.mgdl));
+        const dPeak = sPeak - bPeak;
+        const dTar = Math.round(dPeak * 0.8);
+        const dIauc = Math.round(dPeak * 24);
+        setResult({
+          baseline_curve: bCurve,
+          simulated_curve: sCurve,
+          delta_peak_mgdl: dPeak,
+          delta_iauc: dIauc,
+          delta_tar_min: dTar,
+        });
       } finally {
         setLoading(false);
       }
     },
-    [],
+    [activeAdjustments, meals, uid],
   );
 
   function scheduleRun(
@@ -364,13 +559,24 @@ export default function SimulationScreen() {
     walk: number,
     int: Intensity,
     tim: Timing,
+    adjustments: AdjustmentKey[] = activeAdjustments,
   ) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(
-      () => runSimulation(mId, scale, walk, int, tim),
-      600,
+      () => runSimulation(mId, scale, walk, int, tim, adjustments),
+      350,
     );
   }
+
+  const toggleAdjustment = (adj: AdjustmentKey) => {
+    const next = activeAdjustments.includes(adj)
+      ? activeAdjustments.filter((a) => a !== adj)
+      : [...activeAdjustments, adj];
+    setActiveAdjustments(next);
+    if (selectedMealId) {
+      scheduleRun(selectedMealId, portionPct, walkMin, intensity, timing, next);
+    }
+  };
 
   const mId = selectedMealId;
   const handle =
@@ -385,278 +591,360 @@ export default function SimulationScreen() {
       const w = key === 'walk' ? v : walkMin;
       const i = key === 'intensity' ? v : intensity;
       const ti = key === 'timing' ? v : timing;
-      scheduleRun(mId, s, w, i, ti);
+      scheduleRun(mId, s, w, i, ti, activeAdjustments);
     };
 
   useEffect(() => {
-    if (mId) scheduleRun(mId, portionPct, walkMin, intensity, timing);
+    if (mId && token) {
+      runSimulation(mId, portionPct, walkMin, intensity, timing, activeAdjustments);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mId]);
+  }, [mId, token]);
 
   const recentMeals = (meals ?? []).slice(0, 8);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View f={1} bg="$background">
-        <ScreenHeader
-          title={t('simulation.title')}
-          right={<SettingsButton />}
-        />
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+      <ScreenHeader
+        title={t('simulation.title')}
+        right={<SettingsButton />}
+      />
 
-        <ScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: 112, gap: 16 }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Meal picker */}
-          {!selectedMealId && (
-            <AnimatedCard tone="subtle">
-              <Text fontWeight="800" fontSize="$5" mb="$3">
-                {t('simulation.selectMeal')}
-              </Text>
-              {recentMeals.length === 0 ? (
-                <View ai="center" py="$4" gap="$3">
-                  <Text fontSize="$8">🍽</Text>
-                  <Text color="$colorMuted" ta="center">
-                    {t('simulation.noMeal')}
-                  </Text>
-                </View>
-              ) : (
-                recentMeals.map((m, i) => (
-                  <PressableScale
-                    key={m.id}
-                    onPress={() => setSelectedMealId(m.id)}
-                    scale={0.97}
-                  >
-                    <MotiView
-                      from={{ opacity: 0, translateX: -8 }}
-                      animate={{ opacity: 1, translateX: 0 }}
-                      transition={{ type: 'spring', delay: i * 50 }}
-                    >
-                      <View
-                        fd="row"
-                        ai="center"
-                        jc="space-between"
-                        py="$3"
-                        borderBottomWidth={i < recentMeals.length - 1 ? 1 : 0}
-                        borderColor="$borderColor"
-                      >
-                        <View fd="row" ai="center" gap="$3">
-                          <View
-                            width={10}
-                            height={10}
-                            borderRadius={5}
-                            bg="$primary"
-                            opacity={0.5 + i * 0.06}
-                          />
-                          <Text fontWeight="600">
-                            {m.detected_foods[0]?.name_en ?? 'Meal'}
-                          </Text>
-                        </View>
-                        <View px="$2" py="$1" br="$2" bg="$primarySoft">
-                          <Text
-                            color="$primary"
-                            fontSize="$3"
-                            fontWeight="700"
-                           
-                          >
-                            {m.total_carbs_g.toFixed(0)}g carbs
-                          </Text>
-                        </View>
-                      </View>
-                    </MotiView>
-                  </PressableScale>
-                ))
-              )}
-            </AnimatedCard>
-          )}
-
-          {/* Chart */}
-          {result ? (
-            <AnimatedCard tone="subtle">
-              <View fd="row" jc="space-between" ai="center" mb="$3">
-                <Text fontWeight="800" fontSize="$5">
-                  {t('simulation.title')}
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 112, gap: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Meal picker */}
+        {!selectedMealId && (
+          <AnimatedCard>
+            <Text
+              style={{
+                fontFamily: 'Nunito_800ExtraBold',
+                fontSize: 18,
+                color: theme.color.val,
+                marginBottom: 12,
+              }}
+            >
+              {t('simulation.selectMeal')}
+            </Text>
+            {recentMeals.length === 0 ? (
+              <RNView style={{ alignItems: 'center', paddingVertical: 24, gap: 8 }}>
+                <Text style={{ fontSize: 36 }}>🍽</Text>
+                <Text style={{ fontFamily: 'Nunito_500Medium', color: theme.colorMuted.val, textAlign: 'center' }}>
+                  {t('simulation.noMeal')}
                 </Text>
-                <SafetyBadge label={t('safety.educationalOnly')} />
-              </View>
-              <DualCurveChart
-                baseline={result.baseline_curve}
-                simulated={result.simulated_curve}
-              />
-              <View fd="row" jc="space-around" mt="$4">
-                <DeltaStat
-                  label={t('simulation.deltaPeak')}
-                  value={`${result.delta_peak_mgdl > 0 ? '+' : ''}${result.delta_peak_mgdl.toFixed(0)} mg/dL`}
-                  positive={result.delta_peak_mgdl < 0}
-                />
-                <DeltaStat
-                  label={t('simulation.tar')}
-                  value={`${result.delta_tar_min > 0 ? '+' : ''}${result.delta_tar_min.toFixed(0)} min`}
-                  positive={result.delta_tar_min < 0}
-                />
-              </View>
-            </AnimatedCard>
-          ) : loading ? (
-            <View gap="$3">
-              <MotiView
-                from={{ opacity: 0.4 }}
-                animate={{ opacity: 1 }}
-                transition={{
-                  type: 'timing',
-                  duration: 800,
-                  loop: true,
-                  repeatReverse: true,
-                }}
-              >
-                <View
-                  bg="$surface"
-                  br="$4"
-                  p="$4"
-                  borderWidth={1}
-                  borderColor="$borderColor"
-                  gap="$3"
+              </RNView>
+            ) : (
+              recentMeals.map((m, i) => (
+                <PressableScale
+                  key={m.id}
+                  onPress={() => setSelectedMealId(m.id)}
+                  scale={0.97}
                 >
-                  <ShimmerSkeleton height={140} />
-                  <View fd="row" jc="space-around">
-                    <ShimmerSkeleton height={52} width="40%" />
-                    <ShimmerSkeleton height={52} width="40%" />
-                  </View>
-                </View>
-              </MotiView>
-            </View>
-          ) : null}
-
-          {/* Controls */}
-          {selectedMealId && (
-            <AnimatedCard delay={120} tone="subtle">
-              <View fd="row" jc="space-between" ai="center" mb="$4">
-                <Text fontWeight="800" fontSize="$5">
-                  {t('simulation.controls')}
-                </Text>
-                {selectedMealId && (
-                  <PressableScale
-                    onPress={() => {
-                      setSelectedMealId(null);
-                      setResult(null);
-                    }}
-                    scale={0.9}
+                  <MotiView
+                    from={{ opacity: 0, translateX: -8 }}
+                    animate={{ opacity: 1, translateX: 0 }}
+                    transition={{ type: 'spring', delay: i * 40 }}
                   >
-                    <View
-                      px="$3"
-                      py="$1"
-                      br="$3"
-                      bg="$surfaceMuted"
-                      borderWidth={1}
-                      borderColor="$borderColor"
+                    <RNView
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        paddingVertical: 12,
+                        borderBottomWidth: i < recentMeals.length - 1 ? 1 : 0,
+                        borderColor: theme.borderColor.val,
+                      }}
                     >
-                      <Text fontSize="$3" color="$colorMuted" fontWeight="600">
-                        Change meal
-                      </Text>
-                    </View>
-                  </PressableScale>
-                )}
-              </View>
-              <View gap="$5">
-                <Stepper
-                  label={t('simulation.portionScale')}
-                  value={portionPct}
-                  min={25}
-                  max={150}
-                  step={25}
-                  unit="%"
-                  onChange={handle(setPortionPct, 'scale')}
-                />
-                <Stepper
-                  label={t('simulation.walkMinutes')}
-                  value={walkMin}
-                  min={0}
-                  max={60}
-                  step={10}
-                  unit=" min"
-                  onChange={handle(setWalkMin, 'walk')}
-                />
-
-                <View gap="$2">
-                  <Text fontSize="$4" color="$colorMuted" fontWeight="600"
-                    style={{ fontFamily: 'PlusJakartaSans_600SemiBold' }}>
-                    {t('simulation.intensity')}
-                  </Text>
-                  <View fd="row" gap="$2">
-                    {(['light', 'moderate'] as Intensity[]).map((opt) => (
-                      <View key={opt} f={1}>
-                        <PressableScale
-                          onPress={() =>
-                            handle(setIntensity, 'intensity')(opt)
-                          }
-                          scale={0.94}
+                      <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1, marginRight: 8 }}>
+                        <RNView
+                          style={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: 18,
+                            overflow: 'hidden',
+                            borderWidth: 1,
+                            borderColor: theme.borderColor.val,
+                          }}
                         >
-                          <View
-                            py="$3"
-                            br="$8"
-                            ai="center"
-                            bg={intensity === opt ? '$primary' : '$surfaceMuted'}
-                            borderWidth={1.5}
-                            borderColor={
-                              intensity === opt ? '$primary' : 'transparent'
-                            }
-                            style={intensity === opt ? {
-                              shadowColor: 'rgba(45,212,191,0.4)',
-                              shadowOffset: { width: 0, height: 4 },
-                              shadowOpacity: 1,
-                              shadowRadius: 8,
-                              elevation: 4,
-                            } : undefined}
+                          <Image
+                            source={{ uri: getMealImageUrl(m.image_url, m.detected_foods[0]?.name_en) }}
+                            style={{ width: '100%', height: '100%' }}
+                            resizeMode="cover"
+                          />
+                        </RNView>
+                        <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 15, color: theme.color.val, flex: 1 }} numberOfLines={1}>
+                          {(i18n.language === 'ur' && m.detected_foods[0]?.name_ur) ? m.detected_foods[0].name_ur : (m.detected_foods[0]?.name_en ?? 'Meal')}
+                        </Text>
+                      </RNView>
+                      <RNView
+                        style={{
+                          paddingHorizontal: 10,
+                          paddingVertical: 4,
+                          borderRadius: 9999,
+                          backgroundColor: theme.surfaceMuted.val,
+                        }}
+                      >
+                        <Text style={{ fontFamily: 'Nunito_700Bold', color: '#2AA89A', fontSize: 13 }}>
+                          {`\u200E${m.total_carbs_g.toFixed(0)}g`} {t('today.carbs')}
+                        </Text>
+                      </RNView>
+                    </RNView>
+                  </MotiView>
+                </PressableScale>
+              ))
+            )}
+          </AnimatedCard>
+        )}
+
+        {/* Chart */}
+        {result ? (
+          <AnimatedCard>
+            <RNView style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <Text style={{ fontFamily: 'Nunito_800ExtraBold', fontSize: 18, color: theme.color.val }}>
+                {t('simulation.title')}
+              </Text>
+              <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <RNView
+                  style={{
+                    paddingHorizontal: 8,
+                    paddingVertical: 3,
+                    borderRadius: 9999,
+                    backgroundColor: '#D4F5E9',
+                    borderWidth: 1,
+                    borderColor: '#81C995',
+                  }}
+                >
+                  <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 11, color: '#006A61' }}>
+                    v1.0.0-hybrid-ode
+                  </Text>
+                </RNView>
+                <SafetyBadge label={t('safety.educationalOnly')} />
+              </RNView>
+            </RNView>
+
+            <DualCurveChart
+              baseline={result.baseline_curve}
+              simulated={result.simulated_curve}
+              baselineLabel={t('simulation.baseline')}
+              simulatedLabel={t('simulation.simulated')}
+            />
+
+            <RNView style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 18, gap: 8 }}>
+              <DeltaStat
+                label={t('simulation.deltaPeak')}
+                value={`\u200E${result.delta_peak_mgdl > 0 ? '+' : ''}${result.delta_peak_mgdl.toFixed(0)} mg/dL`}
+                positive={result.delta_peak_mgdl <= 0}
+              />
+              <DeltaStat
+                label="Δ iAUC"
+                value={`\u200E${result.delta_iauc > 0 ? '+' : ''}${result.delta_iauc.toFixed(0)} mg·min`}
+                positive={result.delta_iauc <= 0}
+              />
+              <DeltaStat
+                label={t('simulation.tar')}
+                value={`\u200E${result.delta_tar_min > 0 ? '+' : ''}${result.delta_tar_min.toFixed(0)} min`}
+                positive={result.delta_tar_min <= 0}
+              />
+            </RNView>
+          </AnimatedCard>
+        ) : loading ? (
+          <RNView style={{ gap: 12 }}>
+            <ShimmerSkeleton height={180} />
+          </RNView>
+        ) : null}
+
+        {/* Controls */}
+        {selectedMealId && (
+          <AnimatedCard delay={100}>
+            <RNView style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text style={{ fontFamily: 'Nunito_800ExtraBold', fontSize: 18, color: theme.color.val }}>
+                {t('simulation.controls')}
+              </Text>
+              <PressableScale
+                onPress={() => {
+                  setSelectedMealId(null);
+                  setResult(null);
+                }}
+                scale={0.92}
+              >
+                <RNView
+                  style={{
+                    paddingHorizontal: 12,
+                    paddingVertical: 5,
+                    borderRadius: 9999,
+                    backgroundColor: theme.surfaceMuted.val,
+                    borderWidth: 1,
+                    borderColor: theme.borderColor.val,
+                  }}
+                >
+                  <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 12, color: theme.colorMuted.val }}>
+                    {i18n.language === 'ur' ? 'کھانا تبدیل کریں' : 'Change meal'}
+                  </Text>
+                </RNView>
+              </PressableScale>
+            </RNView>
+
+            <RNView style={{ gap: 20 }}>
+              {/* Multi-Adjustment Combining Chips */}
+              <RNView style={{ gap: 10 }}>
+                <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 14, color: theme.color.val }}>
+                  {i18n.language === 'ur' ? 'فوری تبدیلیاں (یکجا کریں)' : 'Multi-Adjustment Chips (Combine)'}
+                </Text>
+                <RNView style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {ADJUSTMENT_CHIPS.map((chip) => {
+                    const active = activeAdjustments.includes(chip.id);
+                    return (
+                      <PressableScale key={chip.id} onPress={() => toggleAdjustment(chip.id)} scale={0.94}>
+                        <RNView
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 6,
+                            paddingHorizontal: 12,
+                            paddingVertical: 8,
+                            borderRadius: 9999,
+                            backgroundColor: active ? '#D4F5E9' : theme.surfaceMuted.val,
+                            borderWidth: 1.5,
+                            borderColor: active ? '#2AA89A' : theme.borderColor.val,
+                          }}
+                        >
+                          <Text style={{ fontSize: 14 }}>{chip.icon}</Text>
+                          <Text
+                            style={{
+                              fontFamily: 'Nunito_700Bold',
+                              fontSize: 13,
+                              color: active ? '#006A61' : theme.color.val,
+                            }}
+                          >
+                            {i18n.language === 'ur' ? chip.labelUr : chip.labelEn}
+                          </Text>
+                          {active && (
+                            <RNView
+                              style={{
+                                width: 16,
+                                height: 16,
+                                borderRadius: 8,
+                                backgroundColor: '#2AA89A',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              <Text style={{ color: '#FFFFFF', fontSize: 10, fontFamily: 'Nunito_800ExtraBold', lineHeight: 12 }}>✓</Text>
+                            </RNView>
+                          )}
+                        </RNView>
+                      </PressableScale>
+                    );
+                  })}
+                </RNView>
+              </RNView>
+              <Stepper
+                label={t('simulation.portionScale')}
+                value={portionPct}
+                min={25}
+                max={150}
+                step={25}
+                unit="%"
+                onChange={handle(setPortionPct, 'scale')}
+              />
+              <Stepper
+                label={t('simulation.walkMinutes')}
+                value={walkMin}
+                min={0}
+                max={60}
+                step={10}
+                unit=" min"
+                onChange={handle(setWalkMin, 'walk')}
+              />
+
+              {/* Intensity Chips */}
+              <RNView style={{ gap: 8 }}>
+                <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 14, color: theme.color.val }}>
+                  {t('simulation.intensity')}
+                </Text>
+                <RNView style={{ flexDirection: 'row', gap: 10 }}>
+                  {(['light', 'moderate'] as Intensity[]).map((opt) => {
+                    const active = intensity === opt;
+                    return (
+                      <RNView key={opt} style={{ flex: 1 }}>
+                        <PressableScale
+                          onPress={() => handle(setIntensity, 'intensity')(opt)}
+                          scale={0.95}
+                        >
+                          <RNView
+                            style={{
+                              height: 42,
+                              borderRadius: 9999,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              backgroundColor: active ? '#2AA89A' : theme.surfaceMuted.val,
+                              borderWidth: 1,
+                              borderColor: active ? '#2AA89A' : theme.borderColor.val,
+                              ...(active && (Platform.OS === 'web' ? { boxShadow: '0 4px 12px rgba(42, 168, 154, 0.25)' } as any : {
+                                shadowColor: '#2AA89A',
+                                shadowOffset: { width: 0, height: 4 },
+                                shadowOpacity: 0.25,
+                                shadowRadius: 8,
+                              })),
+                            }}
                           >
                             <Text
-                              color={intensity === opt ? '$onPrimary' : '$colorMuted'}
-                              fontWeight="700"
-                              style={{ fontFamily: 'PlusJakartaSans_700Bold' }}
+                              style={{
+                                fontFamily: 'Nunito_700Bold',
+                                fontSize: 14,
+                                color: active ? '#FFFFFF' : theme.colorMuted.val,
+                              }}
                             >
                               {opt === 'light'
                                 ? t('simulation.intensityLight')
                                 : t('simulation.intensityModerate')}
                             </Text>
-                          </View>
+                          </RNView>
                         </PressableScale>
-                      </View>
-                    ))}
-                  </View>
-                </View>
+                      </RNView>
+                    );
+                  })}
+                </RNView>
+              </RNView>
 
-                <View gap="$2">
-                  <Text fontSize="$4" color="$colorMuted" fontWeight="600"
-                    style={{ fontFamily: 'PlusJakartaSans_600SemiBold' }}>
-                    {t('simulation.timing')}
-                  </Text>
-                  <View fd="row" gap="$2">
-                    {([0, 30, 60] as Timing[]).map((opt) => (
-                      <View key={opt} f={1}>
+              {/* Timing Chips */}
+              <RNView style={{ gap: 8 }}>
+                <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 14, color: theme.color.val }}>
+                  {t('simulation.timing')}
+                </Text>
+                <RNView style={{ flexDirection: 'row', gap: 8 }}>
+                  {([0, 30, 60] as Timing[]).map((opt) => {
+                    const active = timing === opt;
+                    return (
+                      <RNView key={opt} style={{ flex: 1 }}>
                         <PressableScale
                           onPress={() => handle(setTiming, 'timing')(opt)}
-                          scale={0.94}
+                          scale={0.95}
                         >
-                          <View
-                            py="$3"
-                            br="$8"
-                            ai="center"
-                            bg={timing === opt ? '$primary' : '$surfaceMuted'}
-                            borderWidth={1.5}
-                            borderColor={
-                              timing === opt ? '$primary' : 'transparent'
-                            }
-                            style={timing === opt ? {
-                              shadowColor: 'rgba(45,212,191,0.4)',
-                              shadowOffset: { width: 0, height: 4 },
-                              shadowOpacity: 1,
-                              shadowRadius: 8,
-                              elevation: 4,
-                            } : undefined}
+                          <RNView
+                            style={{
+                              height: 42,
+                              borderRadius: 9999,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              backgroundColor: active ? '#2AA89A' : theme.surfaceMuted.val,
+                              borderWidth: 1,
+                              borderColor: active ? '#2AA89A' : theme.borderColor.val,
+                              ...(active && (Platform.OS === 'web' ? { boxShadow: '0 4px 12px rgba(42, 168, 154, 0.25)' } as any : {
+                                shadowColor: '#2AA89A',
+                                shadowOffset: { width: 0, height: 4 },
+                                shadowOpacity: 0.25,
+                                shadowRadius: 8,
+                              })),
+                            }}
                           >
                             <Text
-                              color={timing === opt ? '$onPrimary' : '$colorMuted'}
-                              fontWeight="700"
-                              fontSize="$3"
-                              style={{ fontFamily: 'PlusJakartaSans_700Bold' }}
+                              style={{
+                                fontFamily: 'Nunito_700Bold',
+                                fontSize: 13,
+                                color: active ? '#FFFFFF' : theme.colorMuted.val,
+                              }}
                             >
                               {opt === 0
                                 ? t('simulation.now')
@@ -664,17 +952,17 @@ export default function SimulationScreen() {
                                 ? t('simulation.min30')
                                 : t('simulation.min60')}
                             </Text>
-                          </View>
+                          </RNView>
                         </PressableScale>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              </View>
-            </AnimatedCard>
-          )}
-        </ScrollView>
-      </View>
+                      </RNView>
+                    );
+                  })}
+                </RNView>
+              </RNView>
+            </RNView>
+          </AnimatedCard>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }

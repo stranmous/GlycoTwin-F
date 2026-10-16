@@ -102,6 +102,9 @@
     "viewAll": "View all"
   },
   "scan": {
+    "analysisMayTake": "This can take a few seconds while vision models run.",
+    "dishHintPlaceholder": "Dish name (for example, biryani)",
+    "dishHintHelp": "Confirm the dish so GlycoTwin can estimate its portion and nutrition.",
     "title": "Scan Meal",
     "tip": "Point at your plate — include all items",
     "openCamera": "Take Photo",
@@ -115,6 +118,8 @@
     "retake": "Retake"
   },
   "result": {
+    "confirmSuggestion": "Confirm a suggested dish",
+    "checkingDish": "Checking dish...",
     "title": "Detected Foods",
     "confidence": "Confidence",
     "totalCarbs": "Total Carbs",

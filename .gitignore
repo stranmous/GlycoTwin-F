@@ -11,8 +11,35 @@ __pycache__/
 .uv/
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# model weights & storage (fetch via python scripts/fetch_weights.py)
+weights/*
+!weights/.gitkeep
+backend/weights/*
+!backend/weights/.gitkeep
+*.pt
+*.safetensors
+*.bin
+*.onnx
+*.engine
+
+# local database & uploads
+*.db
+*.sqlite
+*.sqlite3
+uploads/*
+!uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
+var/
 
 # env / secrets
+.env
+.env.local
+.env.*.local
+!*.env.example
 firebase-service-account.json
 google-services.json
 GoogleService-Info.plist
@@ -22,6 +49,7 @@ GoogleService-Info.plist
 .idea/
 .DS_Store
 .playwright-mcp/
+.agents/
 
 # build
 build/

@@ -65,7 +65,10 @@ export function PressableScale({
         hitSlop={hitSlop}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
-        style={{ width: '100%' } as StyleProp<ViewStyle>}
+        style={[
+          { width: '100%' } as StyleProp<ViewStyle>,
+          Platform.OS === 'web' ? ({ textAlign: 'start' } as any) : null,
+        ]}
         {...(Platform.OS === 'web' ? { onHoverIn: handleHoverIn, onHoverOut: handleHoverOut } : {})}
       >
         {children}

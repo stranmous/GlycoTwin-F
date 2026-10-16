@@ -1,0 +1,448 @@
+{
+  "method": "leave-one-patient-out",
+  "protocol": "y0=start_glucose; calibration before=meal_time; params fitted on train patients only; held-out uses population median; baselines fitted on train windows only",
+  "dataset": "ohiot1dm",
+  "patients": [
+    "559",
+    "563",
+    "570",
+    "575",
+    "588",
+    "591"
+  ],
+  "folds": [
+    {
+      "held_out": "559",
+      "train": [
+        "563",
+        "570",
+        "575",
+        "588"
+      ],
+      "val": "591",
+      "gate_open": true,
+      "n_windows": 124,
+      "rmse": {
+        "persistence": 60.92,
+        "ridge": 51.1,
+        "mean_meal_response": 54.45,
+        "gru": 66.07,
+        "physics_only": 52.68,
+        "hybrid": 51.96
+      }
+    },
+    {
+      "held_out": "563",
+      "train": [
+        "559",
+        "570",
+        "575",
+        "588"
+      ],
+      "val": "591",
+      "gate_open": true,
+      "n_windows": 117,
+      "rmse": {
+        "persistence": 40.46,
+        "ridge": 40.08,
+        "mean_meal_response": 42.95,
+        "gru": 45.28,
+        "physics_only": 40.96,
+        "hybrid": 41.04
+      }
+    },
+    {
+      "held_out": "570",
+      "train": [
+        "559",
+        "563",
+        "575",
+        "588"
+      ],
+      "val": "591",
+      "gate_open": false,
+      "n_windows": 128,
+      "rmse": {
+        "persistence": 43.03,
+        "ridge": 45.5,
+        "mean_meal_response": 45.07,
+        "gru": 60.67,
+        "physics_only": 65.23,
+        "hybrid": 65.23
+      }
+    },
+    {
+      "held_out": "575",
+      "train": [
+        "559",
+        "563",
+        "570",
+        "588"
+      ],
+      "val": "591",
+      "gate_open": true,
+      "n_windows": 216,
+      "rmse": {
+        "persistence": 51.72,
+        "ridge": 43.44,
+        "mean_meal_response": 46.87,
+        "gru": 57.05,
+        "physics_only": 45.42,
+        "hybrid": 45.26
+      }
+    },
+    {
+      "held_out": "588",
+      "train": [
+        "559",
+        "563",
+        "570",
+        "575"
+      ],
+      "val": "591",
+      "gate_open": true,
+      "n_windows": 213,
+      "rmse": {
+        "persistence": 50.3,
+        "ridge": 41.64,
+        "mean_meal_response": 43.75,
+        "gru": 48.53,
+        "physics_only": 42.98,
+        "hybrid": 42.91
+      }
+    },
+    {
+      "held_out": "591",
+      "train": [
+        "559",
+        "563",
+        "570",
+        "575"
+      ],
+      "val": "588",
+      "gate_open": true,
+      "n_windows": 174,
+      "rmse": {
+        "persistence": 51.68,
+        "ridge": 43.64,
+        "mean_meal_response": 49.43,
+        "gru": 48.61,
+        "physics_only": 45.5,
+        "hybrid": 44.3
+      }
+    }
+  ],
+  "gate_opens": 5,
+  "models": {
+    "persistence": {
+      "overall_rmse": 50.41,
+      "overall_mae": 34.69,
+      "horizons": {
+        "30": {
+          "rmse": 28.85,
+          "mae": 21.06,
+          "n": 972
+        },
+        "60": {
+          "rmse": 53.13,
+          "mae": 40.52,
+          "n": 972
+        },
+        "90": {
+          "rmse": 63.98,
+          "mae": 49.52,
+          "n": 972
+        },
+        "120": {
+          "rmse": 70.28,
+          "mae": 53.44,
+          "n": 972
+        }
+      },
+      "clarke_pct": {
+        "A": 57.1,
+        "B": 36.2,
+        "C": 2.0,
+        "D": 3.6,
+        "E": 1.1
+      },
+      "n_points": 24300
+    },
+    "ridge": {
+      "overall_rmse": 44.04,
+      "overall_mae": 30.56,
+      "horizons": {
+        "30": {
+          "rmse": 27.64,
+          "mae": 20.31,
+          "n": 972
+        },
+        "60": {
+          "rmse": 47.12,
+          "mae": 35.61,
+          "n": 972
+        },
+        "90": {
+          "rmse": 55.28,
+          "mae": 42.75,
+          "n": 972
+        },
+        "120": {
+          "rmse": 59.52,
+          "mae": 46.18,
+          "n": 972
+        }
+      },
+      "clarke_pct": {
+        "A": 62.8,
+        "B": 30.6,
+        "C": 1.5,
+        "D": 4.7,
+        "E": 0.3
+      },
+      "n_points": 24300
+    },
+    "mean_meal_response": {
+      "overall_rmse": 47.04,
+      "overall_mae": 32.24,
+      "horizons": {
+        "30": {
+          "rmse": 27.63,
+          "mae": 20.36,
+          "n": 972
+        },
+        "60": {
+          "rmse": 48.11,
+          "mae": 36.54,
+          "n": 972
+        },
+        "90": {
+          "rmse": 59.62,
+          "mae": 45.5,
+          "n": 972
+        },
+        "120": {
+          "rmse": 67.43,
+          "mae": 51.3,
+          "n": 972
+        }
+      },
+      "clarke_pct": {
+        "A": 61.1,
+        "B": 31.7,
+        "C": 2.6,
+        "D": 4.1,
+        "E": 0.4
+      },
+      "n_points": 24300
+    },
+    "gru": {
+      "overall_rmse": 54.32,
+      "overall_mae": 42.33,
+      "horizons": {
+        "30": {
+          "rmse": 48.64,
+          "mae": 37.61,
+          "n": 972
+        },
+        "60": {
+          "rmse": 51.73,
+          "mae": 40.59,
+          "n": 972
+        },
+        "90": {
+          "rmse": 57.97,
+          "mae": 44.66,
+          "n": 972
+        },
+        "120": {
+          "rmse": 61.03,
+          "mae": 47.45,
+          "n": 972
+        }
+      },
+      "clarke_pct": {
+        "A": 43.8,
+        "B": 43.4,
+        "C": 1.0,
+        "D": 11.6,
+        "E": 0.2
+      },
+      "n_points": 24300
+    },
+    "physics_only": {
+      "overall_rmse": 48.48,
+      "overall_mae": 34.01,
+      "horizons": {
+        "30": {
+          "rmse": 34.59,
+          "mae": 25.51,
+          "n": 972
+        },
+        "60": {
+          "rmse": 51.4,
+          "mae": 38.25,
+          "n": 972
+        },
+        "90": {
+          "rmse": 59.6,
+          "mae": 45.84,
+          "n": 972
+        },
+        "120": {
+          "rmse": 64.37,
+          "mae": 50.08,
+          "n": 972
+        }
+      },
+      "clarke_pct": {
+        "A": 59.7,
+        "B": 32.3,
+        "C": 2.2,
+        "D": 5.5,
+        "E": 0.4
+      },
+      "n_points": 24300
+    },
+    "hybrid": {
+      "overall_rmse": 48.14,
+      "overall_mae": 33.9,
+      "horizons": {
+        "30": {
+          "rmse": 34.67,
+          "mae": 25.7,
+          "n": 972
+        },
+        "60": {
+          "rmse": 51.16,
+          "mae": 38.31,
+          "n": 972
+        },
+        "90": {
+          "rmse": 59.09,
+          "mae": 45.52,
+          "n": 972
+        },
+        "120": {
+          "rmse": 63.57,
+          "mae": 49.39,
+          "n": 972
+        }
+      },
+      "clarke_pct": {
+        "A": 59.4,
+        "B": 32.3,
+        "C": 2.1,
+        "D": 5.8,
+        "E": 0.4
+      },
+      "n_points": 24300
+    }
+  },
+  "per_patient_rmse": {
+    "559": {
+      "persistence": 60.92,
+      "ridge": 51.1,
+      "mean_meal_response": 54.45,
+      "gru": 66.07,
+      "physics_only": 52.68,
+      "hybrid": 51.96
+    },
+    "563": {
+      "persistence": 40.46,
+      "ridge": 40.08,
+      "mean_meal_response": 42.95,
+      "gru": 45.28,
+      "physics_only": 40.96,
+      "hybrid": 41.04
+    },
+    "570": {
+      "persistence": 43.03,
+      "ridge": 45.5,
+      "mean_meal_response": 45.07,
+      "gru": 60.67,
+      "physics_only": 65.23,
+      "hybrid": 65.23
+    },
+    "575": {
+      "persistence": 51.72,
+      "ridge": 43.44,
+      "mean_meal_response": 46.87,
+      "gru": 57.05,
+      "physics_only": 45.42,
+      "hybrid": 45.26
+    },
+    "588": {
+      "persistence": 50.3,
+      "ridge": 41.64,
+      "mean_meal_response": 43.75,
+      "gru": 48.53,
+      "physics_only": 42.98,
+      "hybrid": 42.91
+    },
+    "591": {
+      "persistence": 51.68,
+      "ridge": 43.64,
+      "mean_meal_response": 49.43,
+      "gru": 48.61,
+      "physics_only": 45.5,
+      "hybrid": 44.3
+    }
+  },
+  "bootstrap_95ci_rmse": {
+    "gru": [
+      48.88,
+      60.8
+    ],
+    "hybrid": [
+      43.14,
+      55.66
+    ],
+    "mean_meal_response": [
+      44.22,
+      50.27
+    ],
+    "persistence": [
+      44.63,
+      54.87
+    ],
+    "physics_only": [
+      43.2,
+      56.14
+    ],
+    "ridge": [
+      41.79,
+      47.09
+    ]
+  },
+  "fitted_params": {
+    "559": {
+      "k_abs": 0.06,
+      "S_i": 0.0001
+    },
+    "563": {
+      "k_abs": 0.06,
+      "S_i": 0.0002
+    },
+    "570": {
+      "k_abs": 0.015,
+      "S_i": 0.0001
+    },
+    "575": {
+      "k_abs": 0.015,
+      "S_i": 0.0008
+    },
+    "588": {
+      "k_abs": 0.0375,
+      "S_i": 0.00015
+    },
+    "591": {
+      "k_abs": 0.0375,
+      "S_i": 0.00015
+    }
+  },
+  "ship_gate": {
+    "hybrid_beats_physics_only": true,
+    "hybrid_beats_persistence": true
+  }
+}

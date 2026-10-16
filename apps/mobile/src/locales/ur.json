@@ -102,6 +102,9 @@
     "viewAll": "سب دیکھیں"
   },
   "scan": {
+    "analysisMayTake": "Vision models ko scan mukammal karne mein kuch seconds lag sakte hain.",
+    "dishHintPlaceholder": "Dish ka naam (misal: biryani)",
+    "dishHintHelp": "Portion aur nutrition estimate ke liye dish confirm karein.",
     "title": "کھانا اسکین کریں",
     "tip": "پیمائش کے لیے کھانے کے قریب چمچ یا سکہ رکھیں۔",
     "openCamera": "کیمرا کھولیں",
@@ -115,6 +118,8 @@
     "retake": "دوبارہ لیں"
   },
   "result": {
+    "confirmSuggestion": "Suggested dish confirm karein",
+    "checkingDish": "Dish check ho rahi hai...",
     "title": "شناخت شدہ کھانے",
     "confidence": "اعتماد",
     "totalCarbs": "کل کاربوہائیڈریٹ",
@@ -129,7 +134,7 @@
     "subtitle": "صرف تعلیمی سمولیشن۔",
     "baseline": "بنیادی",
     "simulated": "سمولیٹڈ",
-    "targetBand": "ہدف 70–180 mg/dL",
+    "targetBand": "ہدف \u200E70–180 mg/dL",
     "predictedPeak": "متوقع چوٹی",
     "deltaPeak": "Δ چوٹی",
     "tar": "ہدف سے اوپر کا وقت",
@@ -141,8 +146,8 @@
     "intensityModerate": "اوسط",
     "timing": "کھائیں",
     "now": "اب",
-    "min30": "+30 منٹ",
-    "min60": "+60 منٹ",
+    "min30": "\u200E+30 منٹ",
+    "min60": "\u200E+60 منٹ",
     "selectMeal": "سمولیٹ کرنے کے لیے کھانا چنیں",
     "noMeal": "سمولیشن کے لیے پہلے کوئی کھانا لاگ کریں۔"
   },
@@ -152,7 +157,7 @@
     "window7d": "7 دن",
     "window30d": "30 دن",
     "tirTitle": "ہدف کی حد میں وقت",
-    "tirRange": "70–180 mg/dL",
+    "tirRange": "\u200E70–180 mg/dL",
     "above": "اوپر",
     "below": "نیچے",
     "inRange": "ہدف میں",

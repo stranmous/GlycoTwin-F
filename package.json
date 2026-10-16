@@ -5,7 +5,9 @@
   "packageManager": "pnpm@9.12.0",
   "scripts": {
     "mobile": "pnpm --filter @glycotwin/mobile",
-    "api": "echo 'Use: cd apps/api && uv run uvicorn app.main:app --reload'",
+    "backend": "cd backend && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir app",
+    "api": "cd backend && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir app",
+    "fetch-weights": "python scripts/fetch_weights.py",
     "video:studio": "pnpm --filter @glycotwin/launch-video studio",
     "video:still": "pnpm --filter @glycotwin/launch-video still",
     "video:render": "pnpm --filter @glycotwin/launch-video render",

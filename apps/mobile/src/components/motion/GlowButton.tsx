@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react';
-import { StyleSheet, ViewStyle } from 'react-native';
-import { Text, useTheme, View } from 'tamagui';
+import { Platform, StyleSheet, View as RNView, ViewStyle } from 'react-native';
+import { Text, useTheme } from 'tamagui';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -49,63 +49,68 @@ export function GlowButton({
   }, [glow, pulse]);
 
   const glowStyle = useAnimatedStyle(() => ({
-    opacity: 0.25 + pulse.value * 0.45,
-    transform: [{ scale: 1 + pulse.value * 0.06 }],
+    opacity: 0.2 + pulse.value * 0.3,
+    transform: [{ scale: 1 + pulse.value * 0.04 }],
   }));
 
   const palette = {
     primary: {
-      bg: theme.primary?.val ?? '#2DD4BF',
-      fg: theme.onPrimary?.val ?? '#fff',
-      glowColor: theme.shadowPrimary?.val ?? 'rgba(45,212,191,0.35)',
+      bg: theme.primary?.val ?? '#2AA89A',
+      fg: theme.onPrimary?.val ?? '#FFFFFF',
+      glowColor: 'rgba(42, 168, 154, 0.24)',
+      shadowHex: '#2AA89A',
       border: 'transparent',
     },
     secondary: {
-      bg: theme.secondary?.val ?? '#3B82F6',
-      fg: theme.onSecondary?.val ?? '#fff',
-      glowColor: theme.shadowBlue?.val ?? 'rgba(59,130,246,0.3)',
-      border: 'transparent',
+      bg: theme.backgroundSecondary?.val ?? '#FFF5EB',
+      fg: theme.primary?.val ?? '#2AA89A',
+      glowColor: 'rgba(42, 168, 154, 0.10)',
+      shadowHex: '#3D3D3D',
+      border: 'rgba(42, 168, 154, 0.28)',
     },
     ghost: {
       bg: 'transparent',
-      fg: theme.primary?.val ?? '#2DD4BF',
+      fg: theme.primary?.val ?? '#2AA89A',
       glowColor: 'transparent',
-      border: theme.primary?.val ?? '#2DD4BF',
+      shadowHex: 'transparent',
+      border: theme.primary?.val ?? '#2AA89A',
     },
     danger: {
-      bg: theme.danger?.val ?? '#F43F5E',
-      fg: '#fff',
-      glowColor: theme.shadowRose?.val ?? 'rgba(244,63,94,0.3)',
+      bg: theme.danger?.val ?? '#E57373',
+      fg: '#FFFFFF',
+      glowColor: 'rgba(229, 115, 115, 0.24)',
+      shadowHex: '#E57373',
       border: 'transparent',
     },
   }[variant];
 
   const sizeValues = {
-    sm: { py: 10, px: 20, fontSize: 14 as const },
-    md: { py: 14, px: 24, fontSize: 16 as const },
-    lg: { py: 18, px: 32, fontSize: 18 as const },
-    xl: { py: 22, px: 40, fontSize: 20 as const },
-    '2xl': { py: 28, px: 48, fontSize: 22 as const },
+    sm: { py: 10, px: 20, minH: 40, fontSize: 14 as const },
+    md: { py: 13, px: 24, minH: 48, fontSize: 16 as const },
+    lg: { py: 14, px: 28, minH: 52, fontSize: 17 as const },
+    xl: { py: 15, px: 32, minH: 54, fontSize: 17 as const },
+    '2xl': { py: 18, px: 36, minH: 58, fontSize: 19 as const },
   }[size];
 
   return (
-    <View
-      width={fullWidth ? '100%' : undefined}
-      position="relative"
-      style={style}
+    <RNView
+      style={[
+        { position: 'relative', width: fullWidth ? '100%' : undefined },
+        style,
+      ]}
     >
-      {glow && variant !== 'ghost' ? (
+      {glow && variant !== 'ghost' && !disabled ? (
         <Animated.View
-          pointerEvents="none"
           style={[
             StyleSheet.absoluteFillObject,
             {
+              pointerEvents: 'none',
               borderRadius: 9999,
               backgroundColor: palette.glowColor,
-              top: -8,
-              bottom: -8,
-              left: -8,
-              right: -8,
+              top: -4,
+              bottom: -4,
+              left: -4,
+              right: -4,
             },
             glowStyle,
           ]}
@@ -115,29 +120,45 @@ export function GlowButton({
       <PressableScale
         onPress={onPress}
         disabled={disabled}
-        scale={0.95}
-        style={{ width: '100%' }}
+        scale={0.97}
+        style={{ width: fullWidth ? '100%' : undefined }}
         haptic={variant === 'primary' ? 'medium' : 'light'}
       >
-        <View
-          ai="center"
-          jc="center"
-          fd="row"
-          gap="$2"
-          style={{
-            paddingVertical: sizeValues.py,
-            paddingHorizontal: sizeValues.px,
-            borderRadius: 9999,
-            backgroundColor: palette.bg,
-            borderWidth: variant === 'ghost' ? 1.5 : 0,
-            borderColor: palette.border,
-            opacity: disabled ? 0.45 : 1,
-            shadowColor: variant !== 'ghost' && !disabled ? palette.glowColor : 'transparent',
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: variant !== 'ghost' && !disabled ? 1 : 0,
-            shadowRadius: 16,
-            elevation: variant !== 'ghost' && !disabled ? 8 : 0,
-          }}
+        <RNView
+          style={[
+            {
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              minHeight: sizeValues.minH,
+              paddingVertical: sizeValues.py,
+              paddingHorizontal: sizeValues.px,
+              borderRadius: 9999,
+              backgroundColor: palette.bg,
+              borderWidth: variant === 'ghost' || variant === 'secondary' ? 1.5 : 0,
+              borderColor: palette.border,
+              opacity: disabled ? 0.45 : 1,
+            },
+            variant !== 'ghost' && !disabled
+              ? Platform.OS === 'web'
+                ? ({
+                    boxShadow:
+                      variant === 'primary'
+                        ? '0 6px 16px rgba(42, 168, 154, 0.25)'
+                        : variant === 'danger'
+                        ? '0 6px 16px rgba(229, 115, 115, 0.25)'
+                        : '0 2px 8px rgba(61, 61, 61, 0.05)',
+                  } as any)
+                : {
+                    shadowColor: palette.shadowHex,
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: variant === 'secondary' ? 0.06 : 0.22,
+                    shadowRadius: 12,
+                    elevation: 4,
+                  }
+              : null,
+          ]}
         >
           {icon}
           <Text
@@ -145,14 +166,15 @@ export function GlowButton({
               color: palette.fg,
               fontWeight: '700',
               fontSize: sizeValues.fontSize,
-              fontFamily: 'PlusJakartaSans_700Bold',
-              letterSpacing: 0.3,
+              fontFamily: 'Nunito_700Bold',
+              letterSpacing: 0.2,
+              textAlign: 'center',
             }}
           >
             {label}
           </Text>
-        </View>
+        </RNView>
       </PressableScale>
-    </View>
+    </RNView>
   );
 }

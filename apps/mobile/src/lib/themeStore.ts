@@ -12,11 +12,11 @@ type ThemeState = {
 };
 
 export const useThemeStore = create<ThemeState>((set) => ({
-  pref: 'system',
+  pref: 'light',
   hydrated: false,
   hydrate: async () => {
     const v = (await AsyncStorage.getItem(KEY)) as ThemePref | null;
-    set({ pref: v ?? 'system', hydrated: true });
+    set({ pref: v ?? 'light', hydrated: true });
   },
   setPref: async (p) => {
     await AsyncStorage.setItem(KEY, p);

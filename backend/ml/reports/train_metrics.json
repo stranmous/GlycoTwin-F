@@ -1,0 +1,7 @@
+{
+  "train_n": 585,
+  "val_n": 213,
+  "hybrid_val_rmse": 42.89,
+  "physics_val_rmse": 42.98,
+  "gate_open": true
+}

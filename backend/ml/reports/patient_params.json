@@ -1,0 +1,30 @@
+{
+  "559": {
+    "k_abs": 0.06,
+    "S_i": 0.0001,
+    "train_rmse": 50.02,
+    "n_windows": 124,
+    "n_fit_windows": 31
+  },
+  "563": {
+    "k_abs": 0.06,
+    "S_i": 0.0002,
+    "train_rmse": 29.62,
+    "n_windows": 117,
+    "n_fit_windows": 39
+  },
+  "570": {
+    "k_abs": 0.015,
+    "S_i": 0.0001,
+    "train_rmse": 43.09,
+    "n_windows": 128,
+    "n_fit_windows": 32
+  },
+  "575": {
+    "k_abs": 0.015,
+    "S_i": 0.0008,
+    "train_rmse": 36.66,
+    "n_windows": 216,
+    "n_fit_windows": 36
+  }
+}

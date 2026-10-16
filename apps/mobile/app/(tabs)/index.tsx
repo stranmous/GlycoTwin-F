@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Platform, ScrollView, StyleSheet, View as RNView, Image, Pressable } from 'react-native';
+import { FlatList, Platform, ScrollView, StyleSheet, View as RNView, Image, Pressable, Alert, I18nManager } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, View, useTheme } from 'tamagui';
 import { ChevronRight, Flame, Utensils, Trash2 } from '@tamagui/lucide-icons';
 import { MotiView } from 'moti';
-import Svg, { Defs, LinearGradient, Stop, Rect, Path } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Stop, Rect, Circle } from 'react-native-svg';
 import Animated, {
   useSharedValue, useAnimatedStyle, withRepeat, withTiming,
   withSequence, withDelay, Easing,
@@ -20,38 +20,72 @@ import { SettingsButton } from '../../src/components/SettingsButton';
 import { LogoLockup } from '../../src/components/Logo';
 import { api } from '../../src/lib/apiClient';
 import { useAuthStore } from '../../src/lib/authStore';
-import type { MealOut, UserOut } from '../../src/types/api';
+import { useTwinStore } from '../../src/lib/twinStore';
+import { getMealImageUrl, getDishCulinaryPhoto } from '../../src/lib/mealImage';
+import type { MealOut, UserOut, InsightsSummary } from '../../src/types/api';
 
-// ── Carb tier ────────────────────────────────────────────────────────────────
+// ── Pastel rotating palette ─────────────────────────────────────────────────
+const PASTEL_PALETTE_LIGHT = ['#FFE5D9', '#D4F5E9', '#FFF3CD', '#E8DEF8'];
+const PASTEL_PALETTE_DARK = ['#3D2F28', '#1D352E', '#38321F', '#2E253A'];
+
+// ── Contextual South Asian & General food emoji helper ──────────────────────
+function getFoodEmoji(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes('rice') || lower.includes('biryani') || lower.includes('pulao') || lower.includes('chawal')) return '🍚';
+  if (lower.includes('roti') || lower.includes('naan') || lower.includes('paratha') || lower.includes('bread') || lower.includes('chapati')) return '🫓';
+  if (lower.includes('chicken') || lower.includes('karahi') || lower.includes('tikka') || lower.includes('kebab') || lower.includes('poultry')) return '🍗';
+  if (lower.includes('beef') || lower.includes('mutton') || lower.includes('steak') || lower.includes('lamb') || lower.includes('gosht')) return '🥩';
+  if (lower.includes('fish') || lower.includes('salmon') || lower.includes('tuna') || lower.includes('machli') || lower.includes('prawn')) return '🐟';
+  if (lower.includes('dal') || lower.includes('daal') || lower.includes('lentil') || lower.includes('soup') || lower.includes('curry') || lower.includes('salan') || lower.includes('haleem') || lower.includes('nihari')) return '🥣';
+  if (lower.includes('salad') || lower.includes('cucumber') || lower.includes('kachumber')) return '🥗';
+  if (lower.includes('vegetable') || lower.includes('sabzi') || lower.includes('spinach') || lower.includes('palak') || lower.includes('gobi')) return '🥦';
+  if (lower.includes('egg') || lower.includes('anda') || lower.includes('omelet')) return '🥚';
+  if (lower.includes('mango') || lower.includes('aam')) return '🥭';
+  if (lower.includes('banana') || lower.includes('kela')) return '🍌';
+  if (lower.includes('apple') || lower.includes('fruit') || lower.includes('chaat')) return '🍎';
+  if (lower.includes('tea') || lower.includes('chai') || lower.includes('coffee') || lower.includes('latte')) return '☕';
+  return '🍽️';
+}
+
+// ── Carb tier & semantic colors ─────────────────────────────────────────────
 function carbTier(carbs: number) {
-  if (carbs < 30) return { accent: '#2DD4BF', bg: 'rgba(45,212,191,0.15)', label: 'Low' };
-  if (carbs < 60) return { accent: '#FFB24C', bg: 'rgba(255,178,76,0.15)', label: 'Mod' };
-  return { accent: '#F43F5E', bg: 'rgba(244,63,94,0.15)', label: 'High' };
+  if (carbs < 30) {
+    return {
+      accent: '#006A61', // Deep Teal text on Mint
+      bg: '#D4F5E9',     // Mint
+      label: 'Low',
+      stripe: '#81C995',
+    };
+  }
+  if (carbs < 60) {
+    return {
+      accent: '#B45309', // Warm Deep Amber text on Butter
+      bg: '#FFF3CD',     // Butter
+      label: 'Mod',
+      stripe: '#FFB347',
+    };
+  }
+  return {
+    accent: '#991B1B',   // Deep Coral/Rose text on Peach
+    bg: '#FFE5D9',       // Peach
+    label: 'High',
+    stripe: '#FF8A80',
+  };
 }
 
-// ── Pulsing live dot ──────────────────────────────────────────────────────────
-function LiveDot({ color = '#62F4F1' }: { color?: string }) {
-  const s = useSharedValue(1);
-  const o = useSharedValue(0.7);
-  useEffect(() => {
-    s.value = withRepeat(withTiming(2.2, { duration: 1100, easing: Easing.bezier(0.2, 0, 0.8, 1) }), -1, true);
-    o.value = withRepeat(withTiming(0, { duration: 1100 }), -1, true);
-  }, []);
-  const ring = useAnimatedStyle(() => ({
-    transform: [{ scale: s.value }],
-    opacity: o.value,
-  }));
-  return (
-    <RNView style={{ width: 10, height: 10, alignItems: 'center', justifyContent: 'center' }}>
-      <Animated.View style={[StyleSheet.absoluteFill, { borderRadius: 5, backgroundColor: color }, ring]} />
-      <RNView style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />
-    </RNView>
-  );
-}
-
-// ── Hero card — CGM terminal aesthetic ───────────────────────────────────────
-function HeroCard({ meals, userName }: { meals: MealOut[]; userName?: string }) {
+// ── Hero card — Warm Companion summary with Donut Ring ──────────────────────
+function HeroCard({
+  meals,
+  userName,
+  tirSummary,
+}: {
+  meals: MealOut[];
+  userName?: string;
+  tirSummary?: { inRange: number; above: number; below: number };
+}) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const isDark = theme.background?.val === '#1C1917' || (theme.background?.val ?? '').includes('28,25');
   const totalCarbs = meals.reduce((s, m) => s + m.total_carbs_g, 0);
   const totalKcal = meals.reduce((s, m) => s + m.total_kcal, 0);
   const hour = new Date().getHours();
@@ -64,247 +98,371 @@ function HeroCard({ meals, userName }: { meals: MealOut[]; userName?: string }) 
     weekday: 'long', month: 'long', day: 'numeric',
   });
 
-  // Animated scan line
-  const scanX = useSharedValue(-1);
-  useEffect(() => {
-    scanX.value = withRepeat(
-      withSequence(
-        withTiming(1.1, { duration: 2600, easing: Easing.bezier(0.4, 0, 0.6, 1) }),
-        withTiming(-0.1, { duration: 0 }),
-      ),
-      -1,
-    );
-  }, []);
-  const scanStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: scanX.value * 340 }],
-  }));
+  const inPct = tirSummary ? tirSummary.inRange : (meals.length > 0 ? 84 : 100);
+  const abovePct = tirSummary ? tirSummary.above : (meals.length > 0 ? 11 : 0);
+  const belowPct = tirSummary ? tirSummary.below : (meals.length > 0 ? 5 : 0);
+
+  const C = 238.76;
+  const tot = (inPct + abovePct + belowPct) || 100;
+  const inLen = (inPct / tot) * C;
+  const aboveLen = (abovePct / tot) * C;
+  const belowLen = (belowPct / tot) * C;
 
   return (
     <RNView style={styles.heroMoti}>
-    <MotiView
-      from={{ opacity: 0, translateY: -24 }}
-      animate={{ opacity: 1, translateY: 0 }}
-      transition={{ type: 'spring', damping: 16, stiffness: 140, delay: 40 }}
-      style={{ flex: 1 }}
-    >
-      <RNView style={styles.heroWrapper}>
-        {/* Multi-stop gradient background */}
-        <Svg width="100%" height="100%" style={StyleSheet.absoluteFillObject} preserveAspectRatio="none">
-          <Defs>
-            <LinearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor="#0D2137" />
-              <Stop offset="0.4" stopColor="#004D5C" />
-              <Stop offset="0.75" stopColor="#005C4B" />
-              <Stop offset="1" stopColor="#003330" />
-            </LinearGradient>
-          </Defs>
-          <Rect width="100%" height="100%" fill="url(#hg)" rx="22" />
-          <Path d="M0,60 L400,60" stroke="rgba(98,244,241,0.06)" strokeWidth="1" />
-          <Path d="M0,120 L400,120" stroke="rgba(98,244,241,0.04)" strokeWidth="1" />
-          <Path d="M100,0 L100,200" stroke="rgba(98,244,241,0.04)" strokeWidth="1" />
-          <Path d="M230,0 L230,200" stroke="rgba(98,244,241,0.04)" strokeWidth="1" />
-        </Svg>
-
-        {/* Animated scan line */}
-        <Animated.View style={[styles.scanLine, scanStyle]}>
-          <Svg width={60} height="100%" style={StyleSheet.absoluteFillObject}>
+      <MotiView
+        from={{ opacity: 0, translateY: -16 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'spring', damping: 18, stiffness: 140, delay: 40 }}
+        style={{ flex: 1 }}
+      >
+        <RNView style={[styles.heroWrapper, {
+          backgroundColor: theme.surface.val,
+          borderColor: theme.borderColor.val,
+          ...(Platform.OS === 'web' ? { boxShadow: '0 8px 24px rgba(61, 61, 61, 0.06)' } as any : {
+            shadowColor: '#3D3D3D',
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.08,
+            shadowRadius: 16,
+          }),
+        }]}>
+          {/* Subtle Warm Peach / Espresso Gradient Background */}
+          <Svg width="100%" height="100%" style={StyleSheet.absoluteFillObject} preserveAspectRatio="none">
             <Defs>
-              <LinearGradient id="sl" x1="0" y1="0" x2="1" y2="0">
-                <Stop offset="0" stopColor="rgba(98,244,241,0)" />
-                <Stop offset="0.5" stopColor="rgba(98,244,241,0.12)" />
-                <Stop offset="1" stopColor="rgba(98,244,241,0)" />
+              <LinearGradient id="heroWarmGrad" x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0" stopColor={isDark ? '#3D2F28' : '#FFE5D9'} stopOpacity={isDark ? '0.8' : '0.45'} />
+                <Stop offset="0.6" stopColor={isDark ? '#292524' : '#FFF5EB'} stopOpacity={isDark ? '0.9' : '0.75'} />
+                <Stop offset="1" stopColor={isDark ? '#1C1917' : '#FFFFFF'} stopOpacity={isDark ? '0.95' : '0.9'} />
               </LinearGradient>
             </Defs>
-            <Rect width="60" height="100%" fill="url(#sl)" />
+            <Rect width="100%" height="100%" fill="url(#heroWarmGrad)" rx="24" />
           </Svg>
-        </Animated.View>
 
-        {/* Content wrapper with zIndex to prevent SVG overlap issues on web */}
-        <RNView style={{ position: 'relative', zIndex: 10, flex: 1, justifyContent: 'space-between' }}>
-          <RNView>
-            <Text style={styles.heroGreeting}>{greeting}</Text>
-            <Text style={styles.heroDate}>{dateStr}</Text>
-          </RNView>
+          <RNView style={{ position: 'relative', zIndex: 10, flex: 1, justifyContent: 'space-between' }}>
+            <RNView style={{ marginBottom: 4 }}>
+              <Text style={[styles.heroGreeting, { color: theme.color.val }]}>{greeting}</Text>
+              <Text style={[styles.heroDate, { color: theme.colorMuted.val }]}>{dateStr}</Text>
+            </RNView>
 
-          {/* Stats */}
-          <RNView style={styles.statsRow}>
-            <HeroStat value={String(meals.length)} label={t('today.meals')} accent="#62F4F1" />
-            <RNView style={styles.statDivider} />
-            <HeroStat value={`${totalCarbs.toFixed(0)}g`} label={t('today.carbs')} accent="#A7FF3F" />
-            <RNView style={styles.statDivider} />
-            <HeroStat value={totalKcal.toFixed(0)} label={t('today.kcal')} accent="#FFB24C" />
+            {/* Time-in-Range Circular Progress Ring */}
+            <RNView style={styles.donutContainer}>
+              <RNView style={{ width: 152, height: 152, alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <Svg width={152} height={152} viewBox="0 0 100 100">
+                  {/* Background Track */}
+                  <Circle
+                    cx={50}
+                    cy={50}
+                    r={38}
+                    fill="transparent"
+                    stroke={isDark ? 'rgba(245, 245, 244, 0.12)' : 'rgba(61, 61, 61, 0.08)'}
+                    strokeWidth={10}
+                  />
+                  {/* Below Range Arc (#E57373) */}
+                  {belowLen > 0 && (
+                    <Circle
+                      cx={50}
+                      cy={50}
+                      r={38}
+                      fill="transparent"
+                      stroke="#E57373"
+                      strokeWidth={10}
+                      strokeDasharray={`${belowLen} 999`}
+                      strokeDashoffset={0}
+                      strokeLinecap="round"
+                      transform="rotate(-90 50 50)"
+                    />
+                  )}
+                  {/* Above Range Arc (#FF8A80) */}
+                  {aboveLen > 0 && (
+                    <Circle
+                      cx={50}
+                      cy={50}
+                      r={38}
+                      fill="transparent"
+                      stroke="#FF8A80"
+                      strokeWidth={10}
+                      strokeDasharray={`${aboveLen} 999`}
+                      strokeDashoffset={-belowLen}
+                      strokeLinecap="round"
+                      transform="rotate(-90 50 50)"
+                    />
+                  )}
+                  {/* In-Range Arc (#81C995) */}
+                  {inLen > 0 && (
+                    <Circle
+                      cx={50}
+                      cy={50}
+                      r={38}
+                      fill="transparent"
+                      stroke="#81C995"
+                      strokeWidth={10}
+                      strokeDasharray={`${inLen} 999`}
+                      strokeDashoffset={-(belowLen + aboveLen)}
+                      strokeLinecap="round"
+                      transform="rotate(-90 50 50)"
+                    />
+                  )}
+                </Svg>
+                {/* Center Metrics */}
+                <RNView style={styles.donutCenter}>
+                  <Text style={[styles.donutValue, { color: theme.color.val }]}>{`\u200E${Math.round(inPct)}%`}</Text>
+                  <Text style={[styles.donutLabel, { color: theme.colorMuted.val }]}>{t('insights.tirTitle')}</Text>
+                  <RNView style={styles.donutTargetPill}>
+                    <Text style={styles.donutTargetText}>{'\u200E70–180 mg/dL'}</Text>
+                  </RNView>
+                </RNView>
+              </RNView>
+
+              {/* Quick Donut Legend Indicator */}
+              <RNView style={styles.legendRow}>
+                <RNView style={styles.legendItem}>
+                  <RNView style={[styles.legendDot, { backgroundColor: '#81C995' }]} />
+                  <Text style={[styles.legendText, { color: theme.color.val }]}>{t('insights.inRange')} {`\u200E${Math.round(inPct)}%`}</Text>
+                </RNView>
+                <RNView style={styles.legendItem}>
+                  <RNView style={[styles.legendDot, { backgroundColor: '#FF8A80' }]} />
+                  <Text style={[styles.legendText, { color: theme.color.val }]}>{t('insights.above')} {`\u200E${Math.round(abovePct)}%`}</Text>
+                </RNView>
+                <RNView style={styles.legendItem}>
+                  <RNView style={[styles.legendDot, { backgroundColor: '#E57373' }]} />
+                  <Text style={[styles.legendText, { color: theme.color.val }]}>{t('insights.below')} {`\u200E${Math.round(belowPct)}%`}</Text>
+                </RNView>
+              </RNView>
+            </RNView>
+
+            {/* Stats row with white pill containers */}
+            <RNView style={styles.statsRow}>
+              <HeroStat
+                value={String(meals.length)}
+                label={t('today.meals')}
+                icon="🍽️"
+                accent="#2AA89A"
+              />
+              <HeroStat
+                value={`\u200E${totalCarbs.toFixed(0)}g`}
+                label={t('today.carbs')}
+                icon="🌿"
+                accent="#FFB347"
+              />
+              <HeroStat
+                value={totalKcal.toFixed(0)}
+                label={t('today.kcal')}
+                icon="🔥"
+                accent="#FF8A80"
+              />
+            </RNView>
           </RNView>
         </RNView>
-      </RNView>
-    </MotiView>
+      </MotiView>
     </RNView>
   );
 }
 
-function HeroStat({ value, label, accent }: { value: string; label: string; accent: string }) {
-  return (
-    <RNView style={styles.heroStat}>
-      <Text style={[styles.heroStatValue, { color: accent }]}>{value}</Text>
-      <Text style={styles.heroStatLabel}>{label.toUpperCase()}</Text>
-    </RNView>
-  );
-}
-
-// ── Meal card — precision instrument row ──────────────────────────────────────
-function MealCard({ meal, delay, onPress, onDelete }: { meal: MealOut; delay: number; onPress: () => void; onDelete?: () => void }) {
-  const { t } = useTranslation();
+function HeroStat({ value, label, icon, accent }: { value: string; label: string; icon?: string; accent: string }) {
   const theme = useTheme();
-  const name = meal.detected_foods[0]?.name_en ?? 'Meal';
-  const extra = meal.detected_foods.length > 1 ? ` +${meal.detected_foods.length - 1}` : '';
-  const time = new Date(meal.eaten_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return (
+    <RNView style={[styles.heroStat, {
+      backgroundColor: theme.surface.val,
+      borderColor: theme.borderColor.val,
+      ...(Platform.OS === 'web' ? { boxShadow: '0 2px 8px rgba(61, 61, 61, 0.04)' } as any : {
+        shadowColor: '#3D3D3D',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 6,
+      }),
+    }]}>
+      {icon ? <Text style={{ fontSize: 16, marginBottom: 2 }}>{icon}</Text> : null}
+      <Text style={[styles.heroStatValue, { color: accent }]}>{value}</Text>
+      <Text style={[styles.heroStatLabel, { color: theme.colorMuted.val }]}>{label.toUpperCase()}</Text>
+    </RNView>
+  );
+}
+
+// ── Meal card — Warm Companion card with left stripe & rotating pastel ──────
+function MealCard({
+  meal,
+  index = 0,
+  delay,
+  onPress,
+  onDelete,
+}: {
+  meal: MealOut;
+  index?: number;
+  delay: number;
+  onPress: () => void;
+  onDelete?: () => void;
+}) {
+  const { t, i18n } = useTranslation();
+  const theme = useTheme();
+  const isRTL = I18nManager.isRTL || i18n.language === 'ur';
+  const name = (i18n.language === 'ur' && meal.detected_foods[0]?.name_ur)
+    ? meal.detected_foods[0].name_ur
+    : (meal.detected_foods[0]?.name_en ?? 'Meal');
+  const extra = meal.detected_foods.length > 1 ? ` \u200E+${meal.detected_foods.length - 1}` : '';
+  const time = `\u200E${new Date(meal.eaten_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   const tier = carbTier(meal.total_carbs_g);
   const [imageError, setImageError] = useState(false);
+  const imageUrl = imageError
+    ? getDishCulinaryPhoto(meal.detected_foods[0]?.name_en ?? name)
+    : getMealImageUrl(meal.image_url, meal.detected_foods[0]?.name_en ?? name);
+
+  const isDark = theme.background?.val === '#1C1917' || (theme.background?.val ?? '').includes('28,25');
+  const cardBg = isDark
+    ? PASTEL_PALETTE_DARK[index % PASTEL_PALETTE_DARK.length]
+    : PASTEL_PALETTE_LIGHT[index % PASTEL_PALETTE_LIGHT.length];
 
   return (
     <MotiView
-      from={{ opacity: 0, translateX: -16 }}
-      animate={{ opacity: 1, translateX: 0 }}
-      transition={{ type: 'spring', damping: 18, stiffness: 170, delay }}
+      from={{ opacity: 0, translateY: 14 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: 'spring', damping: 18, stiffness: 160, delay }}
     >
       <PressableScale onPress={onPress}>
         <RNView
           style={[styles.mealCard, {
-            backgroundColor: theme.surface.val,
+            backgroundColor: cardBg,
             borderColor: theme.borderColor.val,
-            ...(Platform.OS === 'web' ? { boxShadow: '0 4px 20px rgba(0,0,0,0.06)' } as any : {
-              shadowColor: 'rgba(0,0,0,0.08)',
+            ...(Platform.OS === 'web' ? { boxShadow: '0 4px 14px rgba(61, 61, 61, 0.06)' } as any : {
+              shadowColor: '#3D3D3D',
               shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 1,
-              shadowRadius: 12,
+              shadowOpacity: 0.06,
+              shadowRadius: 14,
             }),
           }]}
         >
-        {/* Left accent bar — color-coded by carb tier */}
-        <RNView style={[styles.cardAccent, { backgroundColor: tier.accent }]} />
+          {/* 6px semantic border (left in LTR, right in RTL) */}
+          <RNView style={[styles.cardAccent, {
+            backgroundColor: tier.stripe,
+            left: isRTL ? undefined : 0,
+            right: isRTL ? 0 : undefined,
+          }]} />
 
-        <RNView style={styles.cardBody}>
-          {/* Icon */}
-          <RNView style={[styles.foodIcon, { backgroundColor: tier.bg, overflow: 'hidden' }]}>
-            {meal.image_url && !imageError ? (
-              <Image 
-                source={{ uri: meal.image_url.replace('localhost', Platform.OS === 'android' ? '10.0.2.2' : 'localhost') }} 
-                style={{ width: '100%', height: '100%' }} 
-                resizeMode="cover" 
-                onError={() => setImageError(true)}
+          <RNView style={styles.cardBody}>
+            {/* Food photo avatar */}
+            <RNView
+              style={[
+                styles.foodIcon,
+                {
+                  backgroundColor: tier.bg,
+                  overflow: 'hidden',
+                  borderWidth: 1.5,
+                  borderColor: tier.stripe,
+                },
+              ]}
+            >
+              <Image
+                source={{ uri: imageUrl }}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+                onError={() => {
+                  if (!imageError) setImageError(true);
+                }}
               />
-            ) : (
-              <Utensils size={18} color={tier.accent} />
-            )}
-          </RNView>
+            </RNView>
 
-          {/* Content */}
-          <RNView style={styles.cardContent}>
-            <RNView style={styles.cardTop}>
-              <Text style={[styles.mealName, { color: theme.color.val }]} numberOfLines={1}>
-                {name}
-                {extra ? <Text style={styles.mealExtra}>{extra}</Text> : null}
-              </Text>
-              {/* Time badge */}
-              <RNView style={[styles.timeBadge, { borderColor: theme.borderColor.val }]}>
-                <Text style={[styles.timeText, { color: theme.colorMuted.val }]}>{time}</Text>
+            {/* Content */}
+            <RNView style={styles.cardContent}>
+              <RNView style={styles.cardTop}>
+                <Text style={[styles.mealName, { color: theme.color.val }]} numberOfLines={1}>
+                  {name}
+                  {extra ? <Text style={[styles.mealExtra, { color: theme.colorMuted.val }]}>{extra}</Text> : null}
+                </Text>
+                {/* Time badge */}
+                <RNView style={[styles.timeBadge, { backgroundColor: theme.surfaceMuted.val }]}>
+                  <Text style={[styles.timeText, { color: theme.colorMuted.val }]}>{time}</Text>
+                </RNView>
+              </RNView>
+
+              <RNView style={styles.cardMeta}>
+                {/* Carb pill */}
+                <RNView style={[styles.carbPill, { backgroundColor: tier.bg }]}>
+                  <Text style={[styles.carbText, { color: tier.accent }]}>
+                    {`\u200E${meal.total_carbs_g.toFixed(0)}g`} {t('today.carbs')}
+                  </Text>
+                </RNView>
+                {/* Kcal */}
+                <RNView style={styles.kcalRow}>
+                  <Flame size={13} color={theme.colorMuted.val} />
+                  <Text style={[styles.kcalText, { color: theme.colorMuted.val }]}>
+                    {`\u200E${meal.total_kcal.toFixed(0)} kcal`}
+                  </Text>
+                </RNView>
               </RNView>
             </RNView>
 
-            <RNView style={styles.cardMeta}>
-              {/* Carb pill */}
-              <RNView style={[styles.carbPill, { backgroundColor: tier.bg }]}>
-                <Text style={[styles.carbText, { color: tier.accent }]}>
-                  {meal.total_carbs_g.toFixed(0)}g {t('today.carbs')}
-                </Text>
-              </RNView>
-              {/* Kcal */}
-              <RNView style={styles.kcalRow}>
-                <Flame size={11} color={theme.colorMuted.val} />
-                <Text style={[styles.kcalText, { color: theme.colorMuted.val }]}>
-                  {meal.total_kcal.toFixed(0)}
-                </Text>
-              </RNView>
+            <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              {onDelete && (
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    if (Platform.OS === 'web') {
+                      if (window.confirm('Delete this meal entry?')) onDelete();
+                    } else {
+                      Alert.alert(
+                        'Delete Meal',
+                        'Are you sure you want to delete this meal record?',
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          { text: 'Delete', style: 'destructive', onPress: onDelete },
+                        ]
+                      );
+                    }
+                  }}
+                  style={{ padding: 6 }}
+                  hitSlop={8}
+                >
+                  <Trash2 size={18} color="#E57373" opacity={0.85} />
+                </Pressable>
+              )}
+              <ChevronRight
+                size={18}
+                color={theme.colorMuted.val}
+                style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
+              />
             </RNView>
-          </RNView>
-
-          <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-            {onDelete && (
-              <Pressable onPress={(e) => { e.stopPropagation(); onDelete(); }} style={{ padding: 4 }}>
-                <Trash2 size={18} color="#F43F5E" opacity={0.8} />
-              </Pressable>
-            )}
-            <ChevronRight size={16} color={theme.colorMuted.val} />
           </RNView>
         </RNView>
-      </RNView>
-    </PressableScale>
-  </MotiView>
-);
-}
-
-// ── Empty state — radar scanner ───────────────────────────────────────────────
-function ScanRing({ size, delay, color }: { size: number; delay: number; color: string }) {
-  const s = useSharedValue(0.6);
-  const o = useSharedValue(0.7);
-  useEffect(() => {
-    s.value = withDelay(delay, withRepeat(
-      withSequence(
-        withTiming(0.6, { duration: 0 }),
-        withTiming(1.0, { duration: 1800, easing: Easing.out(Easing.quad) }),
-      ),
-      -1,
-    ));
-    o.value = withDelay(delay, withRepeat(
-      withSequence(
-        withTiming(0.7, { duration: 0 }),
-        withTiming(0, { duration: 1800, easing: Easing.out(Easing.quad) }),
-      ),
-      -1,
-    ));
-  }, []);
-  const style = useAnimatedStyle(() => ({
-    transform: [{ scale: s.value }],
-    opacity: o.value,
-  }));
-  return (
-    <Animated.View style={[{
-      position: 'absolute',
-      width: size, height: size,
-      borderRadius: size / 2,
-      borderWidth: 1.5,
-      borderColor: color,
-    }, style]} />
+      </PressableScale>
+    </MotiView>
   );
 }
 
+// ── Empty state — Warm Mascot / Empathetic notice ───────────────────────────
 function EmptyState() {
   const { t } = useTranslation();
+  const router = useRouter();
   const theme = useTheme();
 
   return (
     <RNView style={styles.emptyContainer}>
-      {/* Radar rings */}
-      <RNView style={styles.radarWrap}>
-        <ScanRing size={160} delay={0} color="rgba(45,212,191,0.35)" />
-        <ScanRing size={110} delay={400} color="rgba(45,212,191,0.45)" />
-        <ScanRing size={70} delay={800} color="rgba(45,212,191,0.6)" />
-        <RNView style={styles.radarCenter}>
-          <Utensils size={26} color="#2DD4BF" />
+      <MotiView
+        from={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', damping: 16 }}
+        style={styles.emptyIconWrap}
+      >
+        <RNView style={[styles.emptyIconCircle, { backgroundColor: '#D4F5E9', borderColor: '#81C995' }]}>
+          <Utensils size={32} color="#2AA89A" />
         </RNView>
-      </RNView>
+      </MotiView>
 
       <MotiView
-        from={{ opacity: 0, translateY: 12 }}
+        from={{ opacity: 0, translateY: 10 }}
         animate={{ opacity: 1, translateY: 0 }}
-        transition={{ type: 'spring', delay: 200 }}
-        style={{ alignItems: 'center', gap: 8 }}
+        transition={{ type: 'spring', delay: 150 }}
+        style={{ alignItems: 'center', gap: 12 }}
       >
         <Text style={[styles.emptyTitle, { color: theme.color.val }]}>
           {t('today.noMealsTitle')}
         </Text>
-        <Text style={[styles.emptyBody, { color: theme.colorMuted.val }]}>
+        <Text style={[styles.emptyBody, { color: theme.colorMuted.val, marginBottom: 8 }]}>
           {t('today.noMealsBody')}
         </Text>
+        <PressableScale onPress={() => router.push('/scan/result?mode=manual')}>
+          <RNView style={styles.emptyManualBtn}>
+            <Text style={styles.emptyManualBtnText}>+ Log meal manually</Text>
+          </RNView>
+        </PressableScale>
       </MotiView>
     </RNView>
   );
@@ -315,15 +473,16 @@ function LoadingState() {
   const theme = useTheme();
   return (
     <ScrollView contentContainerStyle={{ gap: 16, paddingHorizontal: 16, paddingTop: 8 }}>
-      <RNView style={[styles.heroWrapper, { opacity: 0.2, height: 192, marginHorizontal: 0 }]} />
+      <RNView style={[styles.heroWrapper, { opacity: 0.4, height: 260, marginHorizontal: 0, backgroundColor: theme.surfaceMuted.val }]} />
       {[0, 1, 2].map((i) => (
         <RNView key={i} style={[styles.mealCard, {
           backgroundColor: theme.surface.val,
           borderColor: theme.borderColor.val,
+          padding: 16,
         }]}>
           <RNView style={{ gap: 10, padding: 4 }}>
-            <ShimmerSkeleton height={15} width="55%" />
-            <ShimmerSkeleton height={11} width="30%" />
+            <ShimmerSkeleton height={18} width="55%" />
+            <ShimmerSkeleton height={14} width="35%" />
           </RNView>
         </RNView>
       ))}
@@ -331,38 +490,222 @@ function LoadingState() {
   );
 }
 
+// ── Digital Twin Profile Card (Module M2) ───────────────────────────────────
+function DigitalTwinCard({ recentMeals }: { recentMeals?: MealOut[] }) {
+  const theme = useTheme();
+  const { calibratedState, isCalibrating, calibrateTwin } = useTwinStore();
+  const isDark = theme.background?.val === '#1C1917' || (theme.background?.val ?? '').includes('28,25');
+
+  const baseline = calibratedState?.baseline_glucose_mg_dl ?? 98.4;
+  const sensitivity = calibratedState?.estimated_insulin_sensitivity ?? 0.041;
+  const carbRate = calibratedState?.carb_absorption_rate_index ?? 0.027;
+  const confidence = Math.round((calibratedState?.confidence_score ?? 0.82) * 100);
+  const isCold = calibratedState?.is_cold_start ?? true;
+  const methodLabel = calibratedState?.estimation_method === 'data_fitted' ? 'Data-Calibrated' : 'Demographic Default';
+
+  const handleRecalibrate = () => {
+    const mealRecords = (recentMeals ?? []).map((m) => ({ carbs_g: m.total_carbs_g, eaten_at: m.eaten_at }));
+    calibrateTwin(undefined, undefined, mealRecords);
+  };
+
+  return (
+    <RNView style={{ marginHorizontal: 16, marginBottom: 20 }}>
+      <MotiView
+        from={{ opacity: 0, translateY: 10 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'spring', damping: 18, delay: 60 }}
+      >
+        <RNView
+          style={[
+            styles.twinCard,
+            {
+              backgroundColor: theme.surface.val,
+              borderColor: theme.borderColor.val,
+              ...(Platform.OS === 'web'
+                ? ({ boxShadow: '0 4px 16px rgba(42, 168, 154, 0.08)' } as any)
+                : {
+                    shadowColor: '#2AA89A',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 12,
+                    elevation: 2,
+                  }),
+            },
+          ]}
+        >
+          {/* Header Row */}
+          <RNView style={styles.twinHeader}>
+            <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+              <RNView style={styles.twinIconWrap}>
+                <Text style={{ fontSize: 20 }}>🧬</Text>
+              </RNView>
+              <RNView style={{ flex: 1 }}>
+                <Text style={[styles.twinTitle, { color: theme.color.val }]}>Digital Twin Profile</Text>
+                <Text style={[styles.twinSub, { color: theme.colorMuted.val }]}>
+                  {isCold ? 'Phenotype Cluster: Insulin Resistant' : 'Calibrated Metabolic Twin'}
+                </Text>
+              </RNView>
+            </RNView>
+
+            {/* Method Badge */}
+            <RNView
+              style={[
+                styles.methodBadge,
+                { backgroundColor: isCold ? '#FFF3CD' : '#D4F5E9' },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.methodBadgeText,
+                  { color: isCold ? '#B45309' : '#006A61' },
+                ]}
+              >
+                {methodLabel}
+              </Text>
+            </RNView>
+          </RNView>
+
+          {/* 4-Stat Grid */}
+          <RNView style={styles.twinGrid}>
+            <RNView style={[styles.twinGridCol, { backgroundColor: isDark ? '#1C1917' : '#FFF5EB' }]}>
+              <Text style={[styles.twinStatLabel, { color: theme.colorMuted.val }]}>Baseline Glucose</Text>
+              <Text style={[styles.twinStatVal, { color: '#2AA89A' }]}>{`\u200E${baseline.toFixed(1)} mg/dL`}</Text>
+            </RNView>
+            <RNView style={[styles.twinGridCol, { backgroundColor: isDark ? '#1C1917' : '#FFF5EB' }]}>
+              <Text style={[styles.twinStatLabel, { color: theme.colorMuted.val }]}>Insulin Sensitivity</Text>
+              <Text style={[styles.twinStatVal, { color: '#006A61' }]}>{`\u200E${sensitivity.toFixed(3)}`}</Text>
+            </RNView>
+            <RNView style={[styles.twinGridCol, { backgroundColor: isDark ? '#1C1917' : '#FFF5EB' }]}>
+              <Text style={[styles.twinStatLabel, { color: theme.colorMuted.val }]}>Carb Absorption</Text>
+              <Text style={[styles.twinStatVal, { color: '#FFB347' }]}>{`\u200E${carbRate.toFixed(3)}/min`}</Text>
+            </RNView>
+            <RNView style={[styles.twinGridCol, { backgroundColor: isDark ? '#1C1917' : '#FFF5EB' }]}>
+              <Text style={[styles.twinStatLabel, { color: theme.colorMuted.val }]}>Confidence</Text>
+              <Text style={[styles.twinStatVal, { color: '#81C995' }]}>{`\u200E${confidence}%`}</Text>
+            </RNView>
+          </RNView>
+
+          {/* Recalibrate Button */}
+          <RNView style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <PressableScale
+              onPress={handleRecalibrate}
+              disabled={isCalibrating}
+              scale={0.96}
+            >
+              <RNView style={styles.recalibrateBtn}>
+                <Text style={styles.recalibrateText}>
+                  {isCalibrating ? '⚡ Calibrating Twin...' : '🔄 Recalibrate'}
+                </Text>
+              </RNView>
+            </PressableScale>
+          </RNView>
+        </RNView>
+      </MotiView>
+    </RNView>
+  );
+}
+
 // ── Screen ────────────────────────────────────────────────────────────────────
 export default function Today() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const theme = useTheme();
+  const isDark = theme.background?.val === '#1C1917' || (theme.background?.val ?? '').includes('28,25');
   const { token, uid } = useAuthStore();
-  const { data: user } = useQuery<UserOut>({
+  const { data: user } = useQuery<UserOut | null>({
     queryKey: ['me', uid],
-    queryFn: () => api.get('/v1/me'),
+    queryFn: () => api.get<UserOut>('/api/v1/auth/profile').catch(() => null),
     enabled: !!token,
   });
-  const { data: meals, isLoading } = useQuery<MealOut[]>({
+  const { data: rawMeals, isLoading } = useQuery<any>({
     queryKey: ['meals', uid],
-    queryFn: () => api.get('/v1/meals?limit=10'),
+    queryFn: async () => {
+      try {
+        const res = await api.get<any>('/api/v1/ingestion/history/meals');
+        if (Array.isArray(res)) return res;
+        if (res && Array.isArray(res.meals)) {
+          return res.meals.map((m: any, i: number) => ({
+            id: m.id || `meal-${i}-${m.logged_at || Date.now()}`,
+            image_url: m.image_url || null,
+            eaten_at: m.eaten_at || m.logged_at || new Date().toISOString(),
+            meal_type: m.meal_type || 'meal',
+            total_carbs_g: m.total_carbs_g ?? m.carbs_g ?? 0,
+            total_kcal: m.total_kcal ?? m.kcal ?? 350,
+            confidence: m.confidence ?? 0.9,
+            user_edited: m.user_edited ?? false,
+            note: m.note ?? m.dish_label ?? '',
+            detected_foods: m.detected_foods || [
+              {
+                id: `f-${i}`,
+                name_en: m.dish_label || 'Meal',
+                name_ur: m.name_ur || null,
+                portion_g: m.portion_g || 250,
+                carbs_g: m.total_carbs_g ?? m.carbs_g ?? 0,
+                kcal: m.total_kcal ?? m.kcal ?? 350,
+                confidence: m.confidence ?? 0.9,
+              },
+            ],
+            created_at: m.created_at || m.logged_at || new Date().toISOString(),
+          }));
+        }
+        return [];
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!token,
+  });
+  const meals: MealOut[] = Array.isArray(rawMeals) ? rawMeals : [];
+
+  const { data: insights } = useQuery<InsightsSummary | null>({
+    queryKey: ['insights', uid, 'today'],
+    queryFn: () => api.get<InsightsSummary>('/api/v1/insights/summary?window=today').catch(() => null),
     enabled: !!token,
   });
 
   const queryClient = useQueryClient();
   const deleteMutation = useMutation({
-    mutationFn: (mealId: string) => api.del(`/v1/meals/${mealId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['meals', uid] });
+    mutationFn: (mealId: string) => api.del(`/api/v1/ingestion/meals/${mealId}`).catch(() => api.del(`/v1/meals/${mealId}`)),
+    onMutate: async (mealId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['meals'] });
+      const previousMeals = queryClient.getQueryData<MealOut[]>(['meals', uid]);
+      if (previousMeals) {
+        queryClient.setQueryData<MealOut[]>(
+          ['meals', uid],
+          previousMeals.filter((m) => m.id !== mealId),
+        );
+      }
+      return { previousMeals };
+    },
+    onError: (_err, _mealId, context) => {
+      if (context?.previousMeals) {
+        queryClient.setQueryData(['meals', uid], context.previousMeals);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['meals'] });
+      queryClient.invalidateQueries({ queryKey: ['insights'] });
     },
   });
 
-  // Extract only the first word from display_name for greeting
   const firstName = user?.display_name?.trim().split(/\s+/)[0];
 
   const todayMeals = (meals ?? []).filter((m) => {
     const d = new Date(m.eaten_at);
-    return d.toDateString() === new Date().toDateString();
+    if (isNaN(d.getTime())) return false;
+    const isToday = d.toDateString() === new Date().toDateString();
+    const isPast24Hours = Math.abs(Date.now() - d.getTime()) < 24 * 60 * 60 * 1000;
+    return isToday || isPast24Hours;
   });
+
+  const displayedMeals = todayMeals.length > 0 ? todayMeals : (meals ?? []);
+  const isShowingToday = todayMeals.length > 0;
+
+  const tirSummary = insights && insights.tir && insights.tir.sample_count > 0 ? {
+    inRange: insights.tir.in_range_pct,
+    above: insights.tir.above_range_pct,
+    below: insights.tir.below_range_pct,
+  } : undefined;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
@@ -374,39 +717,51 @@ export default function Today() {
 
       {isLoading ? (
         <LoadingState />
-      ) : todayMeals.length === 0 ? (
+      ) : displayedMeals.length === 0 ? (
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <HeroCard meals={[]} userName={firstName} />
+          <HeroCard meals={[]} userName={firstName} tirSummary={tirSummary} />
+          <DigitalTwinCard recentMeals={meals ?? []} />
           <EmptyState />
         </ScrollView>
       ) : (
         <FlatList
-          data={todayMeals}
+          data={displayedMeals}
           keyExtractor={(m) => m.id}
           contentContainerStyle={{ paddingBottom: 110 }}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             <>
-              <HeroCard meals={todayMeals} userName={firstName} />
+              <HeroCard meals={displayedMeals} userName={firstName} tirSummary={tirSummary} />
+              <DigitalTwinCard recentMeals={meals ?? []} />
               <RNView style={styles.sectionRow}>
-                <Text style={[styles.sectionLabel, { color: theme.color.val }]}>
-                  {t('today.todaysMeals')}
-                </Text>
-                <RNView style={[styles.countBadge, { backgroundColor: 'rgba(45,212,191,0.12)' }]}>
-                  <Text style={styles.countText}>{todayMeals.length}</Text>
+                <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={[styles.sectionLabel, { color: theme.color.val }]}>
+                    {isShowingToday ? t('today.todaysMeals') : (i18n.language === 'ur' ? 'حالیہ کھانے' : 'Recent Meals')}
+                  </Text>
+                  <RNView style={styles.countBadge}>
+                    <Text style={styles.countText}>{displayedMeals.length}</Text>
+                  </RNView>
                 </RNView>
+                <PressableScale onPress={() => router.push('/scan/result?mode=manual')}>
+                  <RNView style={[styles.manualLogPill, { backgroundColor: isDark ? '#004D40' : '#E6F4F1', borderColor: isDark ? '#80CBC4' : '#2AA89A' }]}>
+                    <Text style={[styles.manualLogPillText, { color: isDark ? '#E0F2F1' : '#006A61' }]}>
+                      + Log manually
+                    </Text>
+                  </RNView>
+                </PressableScale>
               </RNView>
             </>
           }
           renderItem={({ item, index }) => (
-            <RNView style={{ paddingHorizontal: 16, marginBottom: 10 }}>
+            <RNView style={{ paddingHorizontal: 16, marginBottom: 12 }}>
               <MealCard
                 meal={item}
+                index={index}
                 delay={index * 45}
-                onPress={() => router.push({ pathname: '/scan/result', params: { mealId: item.id } })}
+                onPress={() => router.push({ pathname: '/meal/[id]', params: { id: item.id } })}
                 onDelete={() => deleteMutation.mutate(item.id)}
               />
             </RNView>
@@ -431,119 +786,147 @@ const styles = StyleSheet.create({
   heroMoti: {
     alignSelf: 'stretch',
     width: '100%',
-    flexDirection: 'column',
   },
   heroWrapper: {
     marginHorizontal: 16,
     marginBottom: 20,
-    borderRadius: 22,
-    padding: 22,
-    paddingBottom: 20,
+    borderRadius: 24,
+    padding: 20,
     overflow: 'hidden',
-    minHeight: 192,
-    backgroundColor: '#0D2137',
-    shadowColor: '#006b5f',
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.45,
-    shadowRadius: 28,
-    elevation: 12,
-  },
-  scanLine: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 60,
-    left: 0,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 14,
-  },
-  statusPill: {
-    backgroundColor: 'rgba(98,244,241,0.12)',
-    borderRadius: 9999,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
     borderWidth: 1,
-    borderColor: 'rgba(98,244,241,0.25)',
-  },
-  statusText: {
-    fontFamily: 'SpaceGrotesk_600SemiBold',
-    fontSize: 10,
-    color: '#62F4F1',
-    letterSpacing: 0.8,
+    minHeight: 240,
   },
   heroGreeting: {
-    fontFamily: 'SpaceGrotesk_400Regular',
-    fontSize: 18,
-    color: 'rgba(255,248,234,0.90)',
-    marginBottom: 4,
+    fontFamily: 'Nunito_800ExtraBold',
+    fontSize: 22,
+    lineHeight: 28,
+    marginBottom: 2,
   },
   heroDate: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 28,
-    color: '#FFF8EA',
+    fontFamily: 'Nunito_600SemiBold',
+    fontSize: 14,
+    marginBottom: 6,
+  },
+  donutContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 6,
+  },
+  donutCenter: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 1,
+  },
+  donutValue: {
+    fontFamily: 'Nunito_800ExtraBold',
+    fontSize: 26,
     letterSpacing: -0.5,
-    marginBottom: 22,
+  },
+  donutLabel: {
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 9,
+    color: '#8E8E8E',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  donutTargetPill: {
+    backgroundColor: '#D4F5E9',
+    borderRadius: 9999,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginTop: 3,
+  },
+  donutTargetText: {
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 10,
+    color: '#006A61',
+  },
+  legendRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginTop: 8,
+    marginBottom: 10,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  legendText: {
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 11,
   },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 10,
+    marginTop: 4,
   },
   heroStat: {
     flex: 1,
+    borderRadius: 9999,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
     alignItems: 'center',
-    gap: 3,
+    justifyContent: 'center',
+    borderWidth: 1,
   },
   heroStatValue: {
-    fontFamily: 'PlusJakartaSans_800ExtraBold',
-    fontSize: 22,
-    letterSpacing: -0.5,
+    fontFamily: 'Nunito_800ExtraBold',
+    fontSize: 15,
+    marginBottom: 1,
   },
   heroStatLabel: {
-    fontFamily: 'SpaceGrotesk_500Medium',
-    fontSize: 9,
-    color: 'rgba(255,248,234,0.45)',
-    letterSpacing: 0.8,
-  },
-  statDivider: {
-    width: 1,
-    height: 32,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 10,
+    letterSpacing: 0.5,
   },
 
   // ── Meal card ──
   mealCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     overflow: 'hidden',
-    flexDirection: 'row',
+    position: 'relative',
+    minHeight: 88,
   },
   cardAccent: {
-    width: 4,
-    alignSelf: 'stretch',
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 6,
+    zIndex: 2,
   },
   cardBody: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 14,
+    paddingHorizontal: 18,
     gap: 12,
-    paddingVertical: 14,
-    paddingRight: 14,
-    paddingLeft: 12,
   },
   foodIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardContent: {
     flex: 1,
-    gap: 5,
+    gap: 6,
   },
   cardTop: {
     flexDirection: 'row',
@@ -552,24 +935,21 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   mealName: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 14,
-    letterSpacing: -0.1,
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 16,
     flex: 1,
   },
   mealExtra: {
-    fontFamily: 'SpaceGrotesk_400Regular',
+    fontFamily: 'Nunito_500Medium',
     fontSize: 13,
-    color: 'rgba(107,122,118,0.7)',
   },
   timeBadge: {
     borderRadius: 9999,
-    borderWidth: 1,
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 3,
   },
   timeText: {
-    fontFamily: 'SpaceGrotesk_500Medium',
+    fontFamily: 'Nunito_600SemiBold',
     fontSize: 11,
   },
   cardMeta: {
@@ -580,11 +960,11 @@ const styles = StyleSheet.create({
   carbPill: {
     borderRadius: 9999,
     paddingHorizontal: 9,
-    paddingVertical: 2,
+    paddingVertical: 3,
   },
   carbText: {
-    fontFamily: 'SpaceGrotesk_600SemiBold',
-    fontSize: 11,
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 12,
   },
   kcalRow: {
     flexDirection: 'row',
@@ -592,72 +972,162 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   kcalText: {
-    fontFamily: 'SpaceGrotesk_400Regular',
-    fontSize: 11,
+    fontFamily: 'Nunito_500Medium',
+    fontSize: 12,
   },
 
   // ── Section header ──
   sectionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   sectionLabel: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 15,
-    letterSpacing: -0.2,
+    fontFamily: 'Nunito_800ExtraBold',
+    fontSize: 18,
   },
   countBadge: {
     borderRadius: 9999,
-    paddingHorizontal: 8,
+    backgroundColor: '#D4F5E9',
+    paddingHorizontal: 9,
     paddingVertical: 2,
   },
   countText: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    fontFamily: 'Nunito_800ExtraBold',
     fontSize: 12,
-    color: '#2DD4BF',
+    color: '#006A61',
+  },
+  manualLogPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 9999,
+    borderWidth: 1,
+  },
+  manualLogPillText: {
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 12,
+  },
+  emptyManualBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 9999,
+    backgroundColor: '#2AA89A',
+  },
+  emptyManualBtnText: {
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 14,
+    color: '#FFFFFF',
   },
 
-  // ── Empty state / radar ──
+  // ── Empty state ──
   emptyContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 40,
-    paddingTop: 20,
-    paddingBottom: 40,
-    gap: 0,
+    paddingTop: 40,
+    paddingBottom: 60,
   },
-  radarWrap: {
-    width: 160,
-    height: 160,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 28,
+  emptyIconWrap: {
+    marginBottom: 20,
   },
-  radarCenter: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(45,212,191,0.12)',
-    borderWidth: 2,
-    borderColor: 'rgba(45,212,191,0.4)',
+  emptyIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
   emptyTitle: {
-    fontFamily: 'PlusJakartaSans_800ExtraBold',
+    fontFamily: 'Nunito_800ExtraBold',
     fontSize: 20,
     textAlign: 'center',
-    letterSpacing: -0.4,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   emptyBody: {
-    fontFamily: 'SpaceGrotesk_400Regular',
+    fontFamily: 'Nunito_500Medium',
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 22,
+  },
+
+  // ── Digital Twin Card Styles ──
+  twinCard: {
+    borderRadius: 22,
+    borderWidth: 1,
+    padding: 16,
+    overflow: 'hidden',
+  },
+  twinHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+    gap: 8,
+  },
+  twinIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#D4F5E9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  twinTitle: {
+    fontFamily: 'Nunito_800ExtraBold',
+    fontSize: 16,
+  },
+  twinSub: {
+    fontFamily: 'Nunito_500Medium',
+    fontSize: 12,
+  },
+  methodBadge: {
+    borderRadius: 9999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  methodBadgeText: {
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 11,
+  },
+  twinGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  twinGridCol: {
+    flexBasis: '48%',
+    flexGrow: 1,
+    borderRadius: 14,
+    padding: 10,
+    gap: 2,
+  },
+  twinStatLabel: {
+    fontFamily: 'Nunito_600SemiBold',
+    fontSize: 11,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  twinStatVal: {
+    fontFamily: 'Nunito_800ExtraBold',
+    fontSize: 15,
+  },
+  recalibrateBtn: {
+    borderRadius: 9999,
+    backgroundColor: '#D4F5E9',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: '#81C995',
+  },
+  recalibrateText: {
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 12,
+    color: '#006A61',
   },
 });

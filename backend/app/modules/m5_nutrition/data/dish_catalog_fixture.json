@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "data_version": "pakistan-fixture-v1.0",
+  "status": "fixture",
+  "sources": [
+    {
+      "source_id": "project_fixture_v1",
+      "title": "Project-authored deterministic fixture values",
+      "publisher": "Meal Nutrition Estimator project",
+      "url": "https://example.invalid/nutrition-fixture",
+      "license": "not-for-distribution fixture",
+      "commercial_use": "not_applicable",
+      "record_status": "fixture",
+      "accessed_on": "2026-07-21",
+      "transformation": "Hand-authored only for contract and calculation tests; not a nutrition source."
+    }
+  ],
+  "taxonomy": [
+    {"id": "biryani_generic", "names": {"english": "Biryani", "urdu": "بریانی", "roman_urdu": "biryani"}, "aliases": ["biryani"], "category": "rice_dishes", "kind": "dish", "parent_id": null, "observation_mode": "either"},
+    {"id": "biryani_rice_visible", "names": {"english": "Biryani rice", "urdu": "بریانی چاول", "roman_urdu": "biryani chawal"}, "aliases": [], "category": "rice_dishes", "kind": "component", "parent_id": "biryani_generic", "observation_mode": "visible"},
+    {"id": "biryani_potato_occluded", "names": {"english": "Biryani potato", "urdu": "بریانی آلو", "roman_urdu": "biryani aloo"}, "aliases": [], "category": "rice_dishes", "kind": "component", "parent_id": "biryani_generic", "observation_mode": "occluded_user_supplied"},
+    {"id": "daal_generic", "names": {"english": "Daal", "urdu": "دال", "roman_urdu": "daal"}, "aliases": ["dal"], "category": "lentils", "kind": "dish", "parent_id": null, "observation_mode": "either"},
+    {"id": "roti_generic", "names": {"english": "Roti", "urdu": "روٹی", "roman_urdu": "roti"}, "aliases": ["chapati"], "category": "breads", "kind": "dish", "parent_id": null, "observation_mode": "either"},
+    {"id": "chicken_curry_generic", "names": {"english": "Chicken curry", "urdu": "چکن سالن", "roman_urdu": "chicken salan"}, "aliases": [], "category": "curries", "kind": "dish", "parent_id": null, "observation_mode": "either"},
+    {"id": "fixture_rice", "names": {"english": "Fixture cooked rice", "urdu": "نمونہ چاول", "roman_urdu": "namuna chawal"}, "aliases": [], "category": "ingredients", "kind": "ingredient", "parent_id": null, "observation_mode": "occluded_user_supplied"},
+    {"id": "fixture_lentils", "names": {"english": "Fixture cooked lentils", "urdu": "نمونہ دال", "roman_urdu": "namuna daal"}, "aliases": [], "category": "ingredients", "kind": "ingredient", "parent_id": null, "observation_mode": "occluded_user_supplied"},
+    {"id": "fixture_oil", "names": {"english": "Fixture cooking oil", "urdu": "نمونہ تیل", "roman_urdu": "namuna tail"}, "aliases": [], "category": "ingredients", "kind": "ingredient", "parent_id": null, "observation_mode": "occluded_user_supplied"}
+  ],
+  "nutrition_profiles": [
+    {"food_id": "biryani_generic", "nutrients_per_100g": {"calories_kcal": 162, "carbs_g": 22, "protein_g": 6, "fat_g": 5, "fiber_g": 1.5}, "density_g_per_ml": 0.72, "preparation_assumptions": ["Generic test fixture."], "uncertainty": {"relative_percent": 30, "variation_notes": ["Oil, meat, potato, and rice ratio vary significantly by recipe."]}, "provenance": {"source_ids": ["project_fixture_v1"], "transformation": "Fixture value retained for API contract compatibility.", "data_class": "fixture", "review_status": "not_reviewed", "reviewer": null, "reviewed_on": null}},
+    {"food_id": "daal_generic", "nutrients_per_100g": {"calories_kcal": 116, "carbs_g": 16, "protein_g": 7, "fat_g": 3, "fiber_g": 5}, "density_g_per_ml": 0.95, "preparation_assumptions": ["Generic test fixture."], "uncertainty": {"relative_percent": 30, "variation_notes": ["Tempering oil and water ratio change final values."]}, "provenance": {"source_ids": ["project_fixture_v1"], "transformation": "Fixture value retained for API contract compatibility.", "data_class": "fixture", "review_status": "not_reviewed", "reviewer": null, "reviewed_on": null}},
+    {"food_id": "roti_generic", "nutrients_per_100g": {"calories_kcal": 297, "carbs_g": 46, "protein_g": 9, "fat_g": 8, "fiber_g": 7}, "density_g_per_ml": null, "preparation_assumptions": ["Generic test fixture."], "uncertainty": {"relative_percent": 25, "variation_notes": ["Thickness, flour type, and added oil change nutrition."]}, "provenance": {"source_ids": ["project_fixture_v1"], "transformation": "Fixture value retained for API contract compatibility.", "data_class": "fixture", "review_status": "not_reviewed", "reviewer": null, "reviewed_on": null}},
+    {"food_id": "chicken_curry_generic", "nutrients_per_100g": {"calories_kcal": 172, "carbs_g": 4, "protein_g": 19, "fat_g": 9, "fiber_g": 1}, "density_g_per_ml": 0.98, "preparation_assumptions": ["Generic test fixture."], "uncertainty": {"relative_percent": 35, "variation_notes": ["Cut, skin, gravy, and oil content vary by preparation."]}, "provenance": {"source_ids": ["project_fixture_v1"], "transformation": "Fixture value retained for API contract compatibility.", "data_class": "fixture", "review_status": "not_reviewed", "reviewer": null, "reviewed_on": null}},
+    {"food_id": "fixture_rice", "nutrients_per_100g": {"calories_kcal": 130, "carbs_g": 28, "protein_g": 2.5, "fat_g": 0.3, "fiber_g": 0.4}, "density_g_per_ml": 0.75, "preparation_assumptions": ["Recipe-calculation fixture only."], "uncertainty": {"relative_percent": 20, "variation_notes": ["Fixture ingredient has no research validity."]}, "provenance": {"source_ids": ["project_fixture_v1"], "transformation": "Fixture ingredient for deterministic recipe tests.", "data_class": "fixture", "review_status": "not_reviewed", "reviewer": null, "reviewed_on": null}},
+    {"food_id": "fixture_lentils", "nutrients_per_100g": {"calories_kcal": 116, "carbs_g": 20, "protein_g": 9, "fat_g": 0.4, "fiber_g": 8}, "density_g_per_ml": 0.9, "preparation_assumptions": ["Recipe-calculation fixture only."], "uncertainty": {"relative_percent": 20, "variation_notes": ["Fixture ingredient has no research validity."]}, "provenance": {"source_ids": ["project_fixture_v1"], "transformation": "Fixture ingredient for deterministic recipe tests.", "data_class": "fixture", "review_status": "not_reviewed", "reviewer": null, "reviewed_on": null}},
+    {"food_id": "fixture_oil", "nutrients_per_100g": {"calories_kcal": 884, "carbs_g": 0, "protein_g": 0, "fat_g": 100, "fiber_g": 0}, "density_g_per_ml": 0.92, "preparation_assumptions": ["Recipe-calculation fixture only."], "uncertainty": {"relative_percent": 20, "variation_notes": ["Fixture ingredient has no research validity."]}, "provenance": {"source_ids": ["project_fixture_v1"], "transformation": "Fixture ingredient for deterministic recipe tests.", "data_class": "fixture", "review_status": "not_reviewed", "reviewer": null, "reviewed_on": null}}
+  ],
+  "recipe_profiles": [
+    {"recipe_id": "fixture_lentil_rice_v1", "dish_id": "daal_generic", "ingredients": [{"food_id": "fixture_rice", "mass_g": 200}, {"food_id": "fixture_lentils", "mass_g": 100}, {"food_id": "fixture_oil", "mass_g": 10}], "cooked_yield_g": 300, "density_g_per_ml": 0.86, "preparation_assumptions": ["Fixture recipe weights and yield only."], "uncertainty": {"relative_percent": 30, "variation_notes": ["Yield and oil are deliberately synthetic fixture assumptions."]}, "provenance": {"source_ids": ["project_fixture_v1"], "transformation": "Ingredient sum divided by fixture cooked yield.", "data_class": "fixture", "review_status": "not_reviewed", "reviewer": null, "reviewed_on": null}}
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "protocol": "80 Nutrition5k overhead dishes (CC-BY 4.0); ground truth from metric raw depth via table-plane subtraction; pipeline term from Depth Anything V2 relative depth (min-max per image, as served).",
+  "n_dishes": 80,
+  "shapes": {
+    "current_mean": {
+      "k_m_per_px": 0.00017983024761795104,
+      "mape_pct": 17.03,
+      "r2": 0.746
+    },
+    "median": {
+      "k_m_per_px": 0.00017694706058603844,
+      "mape_pct": 18.12,
+      "r2": 0.7219
+    },
+    "range_p90_p10": {
+      "k_m_per_px": 0.00028827517478276747,
+      "mape_pct": 30.2,
+      "r2": -0.018
+    }
+  },
+  "geometric_constant": {
+    "old_heuristic": 0.35,
+    "new_calibrated": 0.19,
+    "range_from_camera_uncertainty": [
+      0.15,
+      0.23
+    ],
+    "derivation": "C = k / s_rig; k=1.798e-4 m/px; s_rig in [0.80, 1.19] mm/px for RealSense D415/D435 at 0.40m",
+    "volume_method": "relative_depth_scaled_area_v2_nutrition5k"
+  },
+  "limitations": [
+    "Calibrated on overhead rig geometry; phone capture (angled) needs re-calibration via weighed-portion study.",
+    "Camera model (D435 vs D415) not in public metadata; range reflects that uncertainty.",
+    "MAPE 17% on overhead cafeteria dishes; real-world accuracy worse until phone-geometry calibration."
+  ]
+}

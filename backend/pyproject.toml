@@ -1,0 +1,63 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "glycotwin-backend"
+version = "0.1.0"
+description = "GlycoTwin FYP backend — eight modules, one FastAPI app"
+requires-python = ">=3.11"
+# Abstract dependency set, grouped by the modules that need them.
+# The reproducible pinned set is backend/requirements-lock.txt
+# (generated with `pip freeze` from the verified venv).
+dependencies = [
+  # core web app (all modules)
+  "fastapi",
+  "uvicorn[standard]",
+  "pydantic>=2",
+  "pydantic-settings",
+  "python-multipart",
+  # M4 auth + persistence
+  "pyjwt",
+  "sqlalchemy[asyncio]>=2",
+  "asyncpg",
+  "psycopg[binary]",
+  "aiosqlite",
+  "alembic",
+  # LI-3 at-rest field encryption (Fernet/AES)
+  "cryptography",
+  # M6 simulation caching
+  "redis",
+  # M1/M2 data work
+  "pandas",
+  "numpy",
+  # M3 predictive core (physics solver; torch residual lives in `ml` extra)
+  "scipy",
+  # M5 vision pipeline (fixture perception runs without the `ml` extra)
+  "pillow",
+  # M8 coach (dense + sparse retrieval, LLM provider calls)
+  "httpx",
+  "scikit-learn",
+  "sentence-transformers",  # multilingual MiniLM for dense retrieval (lazy-loaded)
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "ruff", "mypy"]
+# Heavy ML runtimes — only needed with real model weights present (M3 torch
+# residual training, M5 FastSAM / Depth Anything inference). Everything runs
+# and is tested without them; install with: pip install ".[ml]"
+ml = ["torch", "torchdiffeq", "ultralytics", "transformers", "pinecone"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+ignore = [
+  "B008",  # Depends() in argument defaults is the FastAPI idiom
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

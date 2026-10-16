@@ -1,38 +1,33 @@
 import {
-  PlusJakartaSans_300Light,
-  PlusJakartaSans_400Regular,
-  PlusJakartaSans_500Medium,
-  PlusJakartaSans_600SemiBold,
-  PlusJakartaSans_700Bold,
-  PlusJakartaSans_800ExtraBold,
-} from '@expo-google-fonts/plus-jakarta-sans';
-import {
-  SpaceGrotesk_300Light,
-  SpaceGrotesk_400Regular,
-  SpaceGrotesk_500Medium,
-  SpaceGrotesk_600SemiBold,
-  SpaceGrotesk_700Bold,
-} from '@expo-google-fonts/space-grotesk';
+  Nunito_300Light,
+  Nunito_400Regular,
+  Nunito_500Medium,
+  Nunito_600SemiBold,
+  Nunito_700Bold,
+  Nunito_800ExtraBold,
+  Nunito_900Black,
+} from '@expo-google-fonts/nunito';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useMemo, useState, useId } from 'react';
-import { useColorScheme, View, StyleSheet, LogBox } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { useColorScheme, View, Text, StyleSheet, LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider, Theme } from 'tamagui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Animated, {
   useSharedValue, useAnimatedStyle, withTiming, withRepeat,
-  withSequence, Easing, FadeOut,
+  withSequence, Easing,
 } from 'react-native-reanimated';
-import Svg, { Defs, LinearGradient, Path, Stop, Circle, Ellipse } from 'react-native-svg';
 
 import config from '../tamagui.config';
 import { initI18n } from '../src/lib/i18n';
 import { useAuthStore } from '../src/lib/authStore';
 import { useThemeStore } from '../src/lib/themeStore';
+import { useTwinStore } from '../src/lib/twinStore';
 import { api } from '../src/lib/apiClient';
+import { LogoMark } from '../src/components/Logo';
 
 LogBox.ignoreLogs(['fontFamily']);
 SplashScreen.preventAutoHideAsync();
@@ -43,20 +38,22 @@ const queryClient = new QueryClient({
   },
 });
 
-// ── Boot Loading Screen (Stitch "Loading Screen" aesthetic) ──────────────────
+// ── Boot Loading Screen (Warm Companion "Syncing Metabolism" aesthetic) ──────
 function BootLoader() {
   const ring1 = useSharedValue(0);
   const ring2 = useSharedValue(0);
   const logoScale = useSharedValue(0.85);
   const logoOpacity = useSharedValue(0);
-  const id = useId().replace(/:/g, '');
+  const dot1 = useSharedValue(0);
+  const dot2 = useSharedValue(0);
+  const dot3 = useSharedValue(0);
 
   useEffect(() => {
     logoOpacity.value = withTiming(1, { duration: 600 });
     logoScale.value = withTiming(1, { duration: 700, easing: Easing.out(Easing.back(1.4)) });
     ring1.value = withRepeat(
       withSequence(
-        withTiming(1, { duration: 1400, easing: Easing.out(Easing.quad) }),
+        withTiming(1, { duration: 1600, easing: Easing.out(Easing.quad) }),
         withTiming(0, { duration: 200 }),
       ),
       -1,
@@ -64,82 +61,109 @@ function BootLoader() {
     ring2.value = withRepeat(
       withSequence(
         withTiming(0, { duration: 400 }),
-        withTiming(1, { duration: 1400, easing: Easing.out(Easing.quad) }),
+        withTiming(1, { duration: 1600, easing: Easing.out(Easing.quad) }),
         withTiming(0, { duration: 200 }),
       ),
       -1,
     );
+
+    // 3-dot bouncing animation
+    dot1.value = withRepeat(
+      withSequence(withTiming(-6, { duration: 450 }), withTiming(0, { duration: 450 })),
+      -1,
+      true,
+    );
+    const t1 = setTimeout(() => {
+      dot2.value = withRepeat(
+        withSequence(withTiming(-6, { duration: 450 }), withTiming(0, { duration: 450 })),
+        -1,
+        true,
+      );
+    }, 150);
+    const t2 = setTimeout(() => {
+      dot3.value = withRepeat(
+        withSequence(withTiming(-6, { duration: 450 }), withTiming(0, { duration: 450 })),
+        -1,
+        true,
+      );
+    }, 300);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, []);
 
   const ring1Style = useAnimatedStyle(() => ({
-    opacity: 0.6 - ring1.value * 0.6,
-    transform: [{ scale: 1 + ring1.value * 0.55 }],
+    opacity: 0.5 - ring1.value * 0.5,
+    transform: [{ scale: 1 + ring1.value * 0.45 }],
   }));
   const ring2Style = useAnimatedStyle(() => ({
-    opacity: 0.45 - ring2.value * 0.45,
-    transform: [{ scale: 1 + ring2.value * 0.8 }],
+    opacity: 0.35 - ring2.value * 0.35,
+    transform: [{ scale: 1 + ring2.value * 0.7 }],
   }));
   const logoStyle = useAnimatedStyle(() => ({
     opacity: logoOpacity.value,
     transform: [{ scale: logoScale.value }],
   }));
 
+  const dot1Style = useAnimatedStyle(() => ({ transform: [{ translateY: dot1.value }] }));
+  const dot2Style = useAnimatedStyle(() => ({ transform: [{ translateY: dot2.value }] }));
+  const dot3Style = useAnimatedStyle(() => ({ transform: [{ translateY: dot3.value }] }));
+
   return (
     <View style={styles.bootContainer}>
-      {/* Ambient background glow */}
-      <View style={styles.bootGlow} />
+      {/* Ambient Warm Glows */}
+      <View style={[styles.ambientOrb, styles.orbPeach]} />
+      <View style={[styles.ambientOrb, styles.orbMint]} />
+      <View style={[styles.ambientOrb, styles.orbButter]} />
 
-      {/* Pulse rings */}
-      <Animated.View style={[styles.ring, styles.ring2, ring2Style]} />
-      <Animated.View style={[styles.ring, styles.ring1, ring1Style]} />
+      {/* Top Status Micro Tag */}
+      <View style={styles.topTag}>
+        <View style={styles.pulseDot} />
+        <Text style={styles.topTagText}>SYNCING METABOLISM</Text>
+      </View>
 
-      {/* Logo */}
-      <Animated.View style={[styles.logoContainer, logoStyle]}>
-        <Svg width={100} height={100} viewBox="0 0 650 650" fill="none">
-          <Defs>
-            <LinearGradient id={`lg0-${id}`} x1="125.938" y1="158.437" x2="524.063" y2="491.562" gradientUnits="userSpaceOnUse">
-              <Stop offset="0" stopColor="#62F4F1" />
-              <Stop offset="0.56" stopColor="#A7FF3F" />
-              <Stop offset="1" stopColor="#FFB24C" />
-            </LinearGradient>
-            <LinearGradient id={`lg1-${id}`} x1="125.938" y1="158.437" x2="524.062" y2="491.562" gradientUnits="userSpaceOnUse">
-              <Stop offset="0" stopColor="#62F4F1" />
-              <Stop offset="0.56" stopColor="#A7FF3F" />
-              <Stop offset="1" stopColor="#FFB24C" />
-            </LinearGradient>
-            <LinearGradient id={`lg2-${id}`} x1="138.125" y1="251.875" x2="511.875" y2="416.406" gradientUnits="userSpaceOnUse">
-              <Stop offset="0" stopColor="#62F4F1" />
-              <Stop offset="1" stopColor="#A7FF3F" />
-            </LinearGradient>
-          </Defs>
-          {/* Outer shadow loops */}
-          <Path d="M188.906 369.687C123.906 310.781 136.094 205.156 227.5 158.437C322.969 109.687 424.531 152.344 444.844 249.844C463.125 353.437 361.563 414.375 270.156 381.875C225.469 365.625 197.031 333.125 195 294.531" stroke="#26314D" strokeOpacity="0.7" strokeWidth="44.6875" strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M461.094 280.312C526.094 339.219 513.906 444.844 422.5 491.562C327.031 540.312 225.469 497.656 205.156 400.156C186.875 296.562 288.438 235.625 379.844 268.125C424.531 284.375 452.969 316.875 455 355.469" stroke="#26314D" strokeOpacity="0.7" strokeWidth="44.6875" strokeLinecap="round" strokeLinejoin="round" />
-          {/* Gradient loops */}
-          <Path d="M188.906 369.687C123.906 310.781 136.094 205.156 227.5 158.437C322.969 109.687 424.531 152.344 444.844 249.844C463.125 353.437 361.563 414.375 270.156 381.875C225.469 365.625 197.031 333.125 195 294.531" stroke={`url(#lg0-${id})`} strokeWidth="26.4062" strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M461.094 280.312C526.094 339.219 513.906 444.844 422.5 491.562C327.031 540.312 225.469 497.656 205.156 400.156C186.875 296.562 288.438 235.625 379.844 268.125C424.531 284.375 452.969 316.875 455 355.469" stroke={`url(#lg1-${id})`} strokeWidth="26.4062" strokeLinecap="round" strokeLinejoin="round" />
-          {/* Glucose waveform */}
-          <Path d="M142.188 333.125C190.938 333.125 211.25 333.125 235.625 333.125C268.125 333.125 264.062 249.844 300.625 249.844C339.219 249.844 337.188 416.406 375.781 416.406C412.344 416.406 406.25 333.125 438.75 333.125C465.156 333.125 481.406 333.125 511.875 333.125" stroke="#050914" strokeWidth="42.6562" strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M142.188 333.125C190.938 333.125 211.25 333.125 235.625 333.125C268.125 333.125 264.062 249.844 300.625 249.844C339.219 249.844 337.188 416.406 375.781 416.406C412.344 416.406 406.25 333.125 438.75 333.125C465.156 333.125 481.406 333.125 511.875 333.125" stroke={`url(#lg2-${id})`} strokeWidth="16.25" strokeLinecap="round" strokeLinejoin="round" />
-          {/* Corner brackets */}
-          <Path d="M172.656 223.438V178.75H221.406M477.344 223.438V178.75H428.594M172.656 426.562V471.25H221.406M477.344 426.562V471.25H428.594" stroke="#FFF8EA" strokeOpacity="0.66" strokeWidth="14.2188" strokeLinecap="round" />
-          {/* Data node dots */}
-          <Circle cx="300.625" cy="249.844" r="26.406" fill="#050914" />
-          <Circle cx="300.625" cy="249.844" r="16.25" fill="#62F4F1" />
-          <Circle cx="375.781" cy="416.406" r="26.406" fill="#050914" />
-          <Circle cx="375.781" cy="416.406" r="16.25" fill="#A7FF3F" />
-          <Circle cx="455" cy="333.125" r="30.469" fill="#050914" />
-          <Circle cx="455" cy="333.125" r="18.281" fill="#FFB24C" />
-        </Svg>
-      </Animated.View>
+      {/* Center Hero Unit */}
+      <View style={styles.centerHero}>
+        {/* Concentric Pulsing Badge */}
+        <View style={styles.badgeWrapper}>
+          <Animated.View style={[styles.concentricRing, styles.ringOuter, ring2Style]} />
+          <Animated.View style={[styles.concentricRing, styles.ringInner, ring1Style]} />
+          <Animated.View style={[styles.logoBadge, logoStyle]}>
+            <LogoMark size={56} />
+          </Animated.View>
+          <Text style={styles.sparkle1}>✨</Text>
+          <Text style={styles.sparkle2}>🌱</Text>
+        </View>
 
-      {/* Wordmark */}
-      <Animated.Text style={[styles.wordmark, logoStyle]}>
-        Glyco<Animated.Text style={styles.wordmarkAccent}>Twin</Animated.Text>
-      </Animated.Text>
-      <Animated.Text style={[styles.tagline, logoStyle]}>
-        Your glucose digital twin
-      </Animated.Text>
+        {/* Wordmark */}
+        <Animated.View style={[styles.wordmarkRow, logoStyle]}>
+          <Text style={styles.wordmark}>
+            Glyco<Text style={styles.wordmarkAccent}>Twin</Text>
+          </Text>
+        </Animated.View>
+
+        {/* Subtitle */}
+        <Animated.Text style={[styles.tagline, logoStyle]}>
+          Your friendly diabetes companion
+        </Animated.Text>
+
+        {/* Warm Encouragement Micro-Badge */}
+        <Animated.View style={[styles.encouragementBadge, logoStyle]}>
+          <Text style={styles.encouragementText}>🍯 Balanced habits, gentle days</Text>
+        </Animated.View>
+      </View>
+
+      {/* Bottom Loading Rhythm & Educational Disclaimer */}
+      <View style={styles.bottomSection}>
+        <View style={styles.dotsRow}>
+          <Animated.View style={[styles.dot, { backgroundColor: '#2AA89A' }, dot1Style]} />
+          <Animated.View style={[styles.dot, { backgroundColor: '#81C995' }, dot2Style]} />
+          <Animated.View style={[styles.dot, { backgroundColor: '#FFB347' }, dot3Style]} />
+        </View>
+        <Text style={styles.versionText}>v1.0 • Educational Companion</Text>
+        <Text style={styles.disclaimerText}>Holistic insights • Non-diagnostic guidance</Text>
+      </View>
     </View>
   );
 }
@@ -148,7 +172,7 @@ function BootLoader() {
 function ThemedShell({ children }: { children: React.ReactNode }) {
   const system = useColorScheme();
   const pref = useThemeStore((s) => s.pref);
-  const themeName = pref === 'system' ? (system ?? 'dark') : pref;
+  const themeName = pref === 'system' ? (system ?? 'light') : pref;
   return <Theme name={themeName as 'light' | 'dark'}>{children}</Theme>;
 }
 
@@ -168,20 +192,20 @@ function AuthGate({ appReady }: { appReady: boolean }) {
     } else if (token && emailVerified && (inAuth || (segments.length as number) === 0)) {
       // Check onboarding status before routing
       if (!inOnboarding) {
-        api.get<{ consent_accepted_at: string | null }>('/v1/me')
-          .then((me) => {
-            if (me?.consent_accepted_at) {
+        api.get<any>('/api/v1/auth/profile')
+          .catch(() => api.get<any>('/v1/me'))
+          .then((profile) => {
+            if (profile?.age || profile?.diabetes_type || profile?.consent_accepted_at || profile?.consent_accepted) {
               router.replace('/(tabs)');
             } else {
               router.replace('/(onboarding)/consent');
             }
           })
           .catch(() => {
-            router.replace('/(onboarding)/consent');
+            router.replace('/(tabs)');
           });
       }
     }
-    // If token exists but emailVerified is false, the user is on verify-email — do nothing.
   }, [token, hydrated, emailVerified, segments, router, appReady]);
 
   return null;
@@ -194,26 +218,39 @@ export default function RootLayout() {
   const hydrateTheme = useThemeStore((s) => s.hydrate);
   const system = useColorScheme();
   const pref = useThemeStore((s) => s.pref);
-  const themeName = pref === 'system' ? (system ?? 'dark') : pref;
+  const themeName = pref === 'system' ? (system ?? 'light') : pref;
 
   const [fontsLoaded, fontError] = useFonts({
-    PlusJakartaSans_300Light,
-    PlusJakartaSans_400Regular,
-    PlusJakartaSans_500Medium,
-    PlusJakartaSans_600SemiBold,
-    PlusJakartaSans_700Bold,
-    PlusJakartaSans_800ExtraBold,
-    SpaceGrotesk_300Light,
-    SpaceGrotesk_400Regular,
-    SpaceGrotesk_500Medium,
-    SpaceGrotesk_600SemiBold,
-    SpaceGrotesk_700Bold,
+    Nunito_300Light,
+    Nunito_400Regular,
+    Nunito_500Medium,
+    Nunito_600SemiBold,
+    Nunito_700Bold,
+    Nunito_800ExtraBold,
+    Nunito_900Black,
+    // Aliasing legacy font names to prevent any missing font warnings
+    PlusJakartaSans_300Light: Nunito_300Light,
+    PlusJakartaSans_400Regular: Nunito_400Regular,
+    PlusJakartaSans_500Medium: Nunito_500Medium,
+    PlusJakartaSans_600SemiBold: Nunito_600SemiBold,
+    PlusJakartaSans_700Bold: Nunito_700Bold,
+    PlusJakartaSans_800ExtraBold: Nunito_800ExtraBold,
+    SpaceGrotesk_300Light: Nunito_300Light,
+    SpaceGrotesk_400Regular: Nunito_400Regular,
+    SpaceGrotesk_500Medium: Nunito_500Medium,
+    SpaceGrotesk_600SemiBold: Nunito_600SemiBold,
+    SpaceGrotesk_700Bold: Nunito_700Bold,
   });
 
   useEffect(() => {
     (async () => {
       try {
-        await Promise.all([initI18n(), hydrateAuth(), hydrateTheme()]);
+        await Promise.all([
+          initI18n(),
+          hydrateAuth(),
+          hydrateTheme(),
+          useTwinStore.getState().hydrate(),
+        ]);
       } catch (e) {
         console.error('[RootLayout] init error:', e);
       } finally {
@@ -229,7 +266,7 @@ export default function RootLayout() {
     if (appReady) SplashScreen.hideAsync().catch(() => {});
   }, [appReady]);
 
-  const tamaguiDefault = useMemo(() => 'dark' as const, []);
+  const tamaguiDefault = useMemo(() => 'light' as const, []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -237,9 +274,16 @@ export default function RootLayout() {
         <ThemedShell>
           <SafeAreaProvider>
             <QueryClientProvider client={queryClient}>
-              <StatusBar style="auto" />
+              <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
               <AuthGate appReady={appReady} />
-              <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: themeName === 'dark' ? '#0E1726' : '#FAFAFA' } }} />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: {
+                    backgroundColor: themeName === 'dark' ? '#1C1917' : '#FFFBF5',
+                  },
+                }}
+              />
               {!appReady && (
                 <View style={[StyleSheet.absoluteFill, { zIndex: 9999, elevation: 9999 }]}>
                   <BootLoader />
@@ -256,50 +300,173 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   bootContainer: {
     flex: 1,
-    backgroundColor: '#0E1726',
+    backgroundColor: '#FFFBF5',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 56,
+    paddingHorizontal: 24,
+  },
+  ambientOrb: {
+    position: 'absolute',
+    borderRadius: 9999,
+  },
+  orbPeach: {
+    width: 260,
+    height: 260,
+    backgroundColor: 'rgba(255,229,217,0.5)',
+    top: -40,
+    alignSelf: 'center',
+  },
+  orbMint: {
+    width: 280,
+    height: 280,
+    backgroundColor: 'rgba(212,245,233,0.35)',
+    top: '30%',
+    alignSelf: 'center',
+  },
+  orbButter: {
+    width: 240,
+    height: 240,
+    backgroundColor: 'rgba(255,243,205,0.4)',
+    bottom: -20,
+    alignSelf: 'center',
+  },
+  topTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 9999,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(61,61,61,0.06)',
+    shadowColor: 'rgba(61,61,61,0.04)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+  },
+  pulseDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#2AA89A',
+  },
+  topTagText: {
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 11,
+    color: '#006A61',
+    letterSpacing: 0.8,
+  },
+  centerHero: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  bootGlow: {
-    position: 'absolute',
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    backgroundColor: 'rgba(45,212,191,0.08)',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -160 }, { translateY: -200 }],
-  },
-  ring: {
-    position: 'absolute',
-    borderRadius: 9999,
-    borderWidth: 1.5,
-    borderColor: 'rgba(45,212,191,0.5)',
-  },
-  ring1: { width: 160, height: 160 },
-  ring2: { width: 220, height: 220 },
-  logoContainer: {
-    width: 100,
-    height: 100,
+  badgeWrapper: {
+    position: 'relative',
+    width: 180,
+    height: 180,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
   },
+  concentricRing: {
+    position: 'absolute',
+    borderRadius: 9999,
+  },
+  ringOuter: {
+    width: 170,
+    height: 170,
+    backgroundColor: 'rgba(166,240,185,0.22)',
+  },
+  ringInner: {
+    width: 130,
+    height: 130,
+    backgroundColor: 'rgba(232,222,248,0.3)',
+  },
+  logoBadge: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'rgba(42,168,154,0.18)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 18,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(61,61,61,0.06)',
+  },
+  sparkle1: {
+    position: 'absolute',
+    top: 10,
+    right: 18,
+    fontSize: 16,
+  },
+  sparkle2: {
+    position: 'absolute',
+    bottom: 12,
+    left: 18,
+    fontSize: 14,
+  },
+  wordmarkRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: 6,
+  },
   wordmark: {
-    // Fallback to system font so BootLoader doesn't warn before fonts load
-    fontWeight: '900',
-    fontSize: 32,
-    color: '#FFF8EA',
+    fontFamily: 'Nunito_800ExtraBold',
+    fontSize: 34,
+    color: '#3D3D3D',
     letterSpacing: -0.5,
-    marginBottom: 8,
   },
   wordmarkAccent: {
-    color: '#2DD4BF',
+    color: '#2AA89A',
   },
   tagline: {
-    fontWeight: '500',
-    fontSize: 14,
-    color: 'rgba(255,248,234,0.5)',
-    letterSpacing: 0.5,
+    fontFamily: 'Nunito_500Medium',
+    fontSize: 15,
+    color: '#8E8E8E',
+    marginBottom: 14,
+  },
+  encouragementBadge: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 9999,
+    backgroundColor: 'rgba(255,229,217,0.7)',
+  },
+  encouragementText: {
+    fontFamily: 'Nunito_600SemiBold',
+    fontSize: 13,
+    color: '#3D3D3D',
+  },
+  bottomSection: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  dotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  dot: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+  },
+  versionText: {
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 11,
+    color: '#8E8E8E',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  disclaimerText: {
+    fontFamily: 'Nunito_400Regular',
+    fontSize: 12,
+    color: '#8E8E8E',
   },
 });

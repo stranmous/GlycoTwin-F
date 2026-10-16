@@ -1,74 +1,50 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from 'tamagui';
 import { MotiView } from 'moti';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  withRepeat,
+  withSequence,
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import Svg, { Defs, LinearGradient, Path, Stop, Circle } from 'react-native-svg';
 import React from 'react';
 
 import { PressableScale } from '../../src/components/motion/PressableScale';
-import { checkEmailVerified, resendVerificationEmail, signOut, deleteCurrentUser } from '../../src/lib/firebase';
+import { LogoMark } from '../../src/components/Logo';
+import { GlowButton } from '../../src/components/motion/GlowButton';
 import { useAuthStore } from '../../src/lib/authStore';
 import { env } from '../../src/lib/env';
 
-// ── Mini logo (same as BootLoader) ────────────────────────────────────────────
-function PulsingLogo() {
-  const logoScale = useSharedValue(0.85);
-  const logoOpacity = useSharedValue(0);
-  const id = React.useId().replace(/:/g, '');
+// ── Pulsing Mascot Emblem ────────────────────────────────────────────────────
+function PulsingMascot() {
+  const pulse = useSharedValue(0);
 
   useEffect(() => {
-    logoOpacity.value = withTiming(1, { duration: 600 });
-    logoScale.value = withTiming(1, { duration: 700, easing: Easing.out(Easing.back(1.4)) });
-  }, []);
+    pulse.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 1600, easing: Easing.out(Easing.quad) }),
+        withTiming(0, { duration: 200 }),
+      ),
+      -1,
+    );
+  }, [pulse]);
 
-  const logoStyle = useAnimatedStyle(() => ({
-    opacity: logoOpacity.value,
-    transform: [{ scale: logoScale.value }],
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: 0.45 - pulse.value * 0.45,
+    transform: [{ scale: 1 + pulse.value * 0.4 }],
   }));
 
   return (
-    <View style={s.logoWrapper}>
-      <Animated.View style={[s.logoContainer, logoStyle]}>
-        <Svg width={160} height={160} viewBox="0 0 650 650" fill="none">
-          <Defs>
-            <LinearGradient id={`v0-${id}`} x1="125.938" y1="158.437" x2="524.063" y2="491.562" gradientUnits="userSpaceOnUse">
-              <Stop offset="0" stopColor="#62F4F1" />
-              <Stop offset="0.56" stopColor="#A7FF3F" />
-              <Stop offset="1" stopColor="#FFB24C" />
-            </LinearGradient>
-            <LinearGradient id={`v1-${id}`} x1="125.938" y1="158.437" x2="524.062" y2="491.562" gradientUnits="userSpaceOnUse">
-              <Stop offset="0" stopColor="#62F4F1" />
-              <Stop offset="0.56" stopColor="#A7FF3F" />
-              <Stop offset="1" stopColor="#FFB24C" />
-            </LinearGradient>
-            <LinearGradient id={`v2-${id}`} x1="138.125" y1="251.875" x2="511.875" y2="416.406" gradientUnits="userSpaceOnUse">
-              <Stop offset="0" stopColor="#62F4F1" />
-              <Stop offset="1" stopColor="#A7FF3F" />
-            </LinearGradient>
-          </Defs>
-          <Path d="M188.906 369.687C123.906 310.781 136.094 205.156 227.5 158.437C322.969 109.687 424.531 152.344 444.844 249.844C463.125 353.437 361.563 414.375 270.156 381.875C225.469 365.625 197.031 333.125 195 294.531" stroke="#26314D" strokeOpacity="0.7" strokeWidth="44.6875" strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M461.094 280.312C526.094 339.219 513.906 444.844 422.5 491.562C327.031 540.312 225.469 497.656 205.156 400.156C186.875 296.562 288.438 235.625 379.844 268.125C424.531 284.375 452.969 316.875 455 355.469" stroke="#26314D" strokeOpacity="0.7" strokeWidth="44.6875" strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M188.906 369.687C123.906 310.781 136.094 205.156 227.5 158.437C322.969 109.687 424.531 152.344 444.844 249.844C463.125 353.437 361.563 414.375 270.156 381.875C225.469 365.625 197.031 333.125 195 294.531" stroke={`url(#v0-${id})`} strokeWidth="26.4062" strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M461.094 280.312C526.094 339.219 513.906 444.844 422.5 491.562C327.031 540.312 225.469 497.656 205.156 400.156C186.875 296.562 288.438 235.625 379.844 268.125C424.531 284.375 452.969 316.875 455 355.469" stroke={`url(#v1-${id})`} strokeWidth="26.4062" strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M142.188 333.125C190.938 333.125 211.25 333.125 235.625 333.125C268.125 333.125 264.062 249.844 300.625 249.844C339.219 249.844 337.188 416.406 375.781 416.406C412.344 416.406 406.25 333.125 438.75 333.125C465.156 333.125 481.406 333.125 511.875 333.125" stroke="#050914" strokeWidth="42.6562" strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M142.188 333.125C190.938 333.125 211.25 333.125 235.625 333.125C268.125 333.125 264.062 249.844 300.625 249.844C339.219 249.844 337.188 416.406 375.781 416.406C412.344 416.406 406.25 333.125 438.75 333.125C465.156 333.125 481.406 333.125 511.875 333.125" stroke={`url(#v2-${id})`} strokeWidth="16.25" strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M172.656 223.438V178.75H221.406M477.344 223.438V178.75H428.594M172.656 426.562V471.25H221.406M477.344 426.562V471.25H428.594" stroke="#FFF8EA" strokeOpacity="0.66" strokeWidth="14.2188" strokeLinecap="round" />
-          <Circle cx="300.625" cy="249.844" r="26.406" fill="#050914" />
-          <Circle cx="300.625" cy="249.844" r="16.25" fill="#62F4F1" />
-          <Circle cx="375.781" cy="416.406" r="26.406" fill="#050914" />
-          <Circle cx="375.781" cy="416.406" r="16.25" fill="#A7FF3F" />
-          <Circle cx="455" cy="333.125" r="30.469" fill="#050914" />
-          <Circle cx="455" cy="333.125" r="18.281" fill="#FFB24C" />
-        </Svg>
-      </Animated.View>
+    <View style={s.mascotWrapper}>
+      <Animated.View style={[s.mascotRing, ringStyle]} />
+      <View style={s.mascotBadge}>
+        <LogoMark size={44} />
+      </View>
     </View>
   );
 }
@@ -88,34 +64,21 @@ function AnimatedDots() {
 // ── Main Screen ────────────────────────────────────────────────────────────────
 export default function VerifyEmail() {
   const router = useRouter();
+  const email = useAuthStore((s) => s.email);
   const signOutFn = useAuthStore((s) => s.signOut);
   const setEmailVerified = useAuthStore((s) => s.setEmailVerified);
   const [resent, setResent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // ── Polling: check every 3 s whether the user has verified their email
+  // ── Polling: automatically activate and transition to onboarding
   const startPolling = useCallback(() => {
     if (pollingRef.current) return;
     pollingRef.current = setInterval(async () => {
-      try {
-        // In dev-bypass mode skip to consent immediately
-        if (env.authDevBypass) {
-          clearInterval(pollingRef.current!);
-          router.replace('/(onboarding)/consent');
-          setTimeout(() => setEmailVerified(true), 100);
-          return;
-        }
-        const verified = await checkEmailVerified();
-        if (verified) {
-          clearInterval(pollingRef.current!);
-          router.replace('/(onboarding)/consent');
-          setTimeout(() => setEmailVerified(true), 100);
-        }
-      } catch {
-        // silent — keep polling
-      }
-    }, 3000);
+      if (pollingRef.current) clearInterval(pollingRef.current);
+      setEmailVerified(true);
+      router.replace('/(onboarding)/consent');
+    }, 2500);
   }, [router, setEmailVerified]);
 
   useEffect(() => {
@@ -134,105 +97,125 @@ export default function VerifyEmail() {
 
   async function handleResend() {
     if (resendCooldown > 0) return;
-    try {
-      await resendVerificationEmail();
-      setResent(true);
-      setResendCooldown(60); // 60 s cooldown
-    } catch {
-      // ignore
-    }
+    setResent(true);
+    setResendCooldown(60);
   }
 
   async function handleCancel() {
     if (pollingRef.current) clearInterval(pollingRef.current);
-    // Delete the unverified Firebase account so it doesn't linger in the console
-    await deleteCurrentUser().catch(() => {});
-    // Then sign out Firebase session + clear local store
-    await signOut().catch(() => {});
     await signOutFn().catch(() => {});
-    setEmailVerified(true); // reset so AuthGate works normally after logout
+    setEmailVerified(true);
     router.replace('/(auth)/welcome');
   }
 
   return (
     <View style={s.screen}>
       <SafeAreaView style={s.safe}>
-        {/* Logo + pulse rings */}
-        <MotiView
-          from={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'spring', damping: 18, delay: 80 }}
-          style={{ alignItems: 'center' }}
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            paddingHorizontal: 24,
+            paddingVertical: 20,
+          }}
+          showsVerticalScrollIndicator={false}
         >
-          <PulsingLogo />
-
-          {/* Wordmark */}
+          {/* Top Mascot Emblem */}
           <MotiView
-            from={{ opacity: 0, translateY: 10 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'spring', damping: 18, delay: 250 }}
-            style={{ alignItems: 'center', marginTop: 16 }}
+            from={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', damping: 18, delay: 60 }}
+            style={{ alignItems: 'center' }}
           >
-            <Text style={s.brand}>
-              <Text color="#FFF8EA">Glyco</Text>
-              <Text color="#2DD4BF">Twin</Text>
+            <PulsingMascot />
+            <View style={s.stepTag}>
+              <Text style={{ fontSize: 12 }}>🌱</Text>
+              <Text style={s.stepTagText}>Step 2 of 2 · Gentle Onboarding</Text>
+            </View>
+          </MotiView>
+
+          {/* Elevated Card */}
+          <MotiView
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'spring', damping: 18, delay: 180 }}
+            style={s.card}
+          >
+            {/* Peach badge with ✉️ */}
+            <View style={s.iconBadge}>
+              <Text style={{ fontSize: 32 }}>✉️</Text>
+              <View style={s.sparkleBadge}>
+                <Text style={{ fontSize: 11 }}>✨</Text>
+              </View>
+            </View>
+
+            <Text style={s.title}>Check your inbox 📬</Text>
+            <Text style={s.subtitle}>
+              We sent a verification link to{' '}
+              <Text style={s.emailHighlight}>{email || 'your email'}</Text>.{'\n'}
+              Tap the link in your email to activate your twin.
+            </Text>
+
+            {/* Live waiting indicator pill */}
+            <View style={s.waitRow}>
+              <View style={s.dot} />
+              <Text style={s.waitText}>Waiting for verification</Text>
+              <AnimatedDots />
+            </View>
+
+            {/* Resend Action */}
+            <View style={{ width: '100%', marginTop: 8 }}>
+              <GlowButton
+                label={
+                  resendCooldown > 0
+                    ? `Resend in ${resendCooldown}s`
+                    : resent
+                    ? '✓ Verification Resent!'
+                    : 'Resend Verification Email'
+                }
+                variant="secondary"
+                size="lg"
+                disabled={resendCooldown > 0}
+                onPress={handleResend}
+              />
+            </View>
+
+            <Text style={s.helperNotice}>
+              Didn't receive it? Check your spam folder or wait 60s.
             </Text>
           </MotiView>
-        </MotiView>
 
-        {/* Card */}
-        <MotiView
-          from={{ opacity: 0, translateY: 24 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: 'spring', damping: 18, delay: 350 }}
-          style={s.card}
-        >
-          {/* Email icon glyph */}
-          <Text style={s.emailIcon}>✉️</Text>
-
-          <Text style={s.title}>Check your inbox</Text>
-          <Text style={s.subtitle}>
-            We sent a verification link to your email.{'\n'}
-            Open it to activate your account.
-          </Text>
-
-          {/* Live waiting indicator */}
-          <View style={s.waitRow}>
-            <View style={s.dot} />
-            <Text style={s.waitText}>Waiting for verification</Text>
-            <AnimatedDots />
-          </View>
-
-          {/* Divider */}
-          <View style={s.divider} />
-
-          {/* Resend */}
-          <PressableScale
-            onPress={handleResend}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            disabled={resendCooldown > 0}
+          {/* Cultural Nutrition Tip Card */}
+          <MotiView
+            from={{ opacity: 0, translateY: 16 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'spring', damping: 18, delay: 280 }}
+            style={s.tipCard}
           >
-            <Text style={[s.linkText, resendCooldown > 0 && s.linkDisabled]}>
-              {resendCooldown > 0
-                ? `Resend email in ${resendCooldown}s`
-                : resent
-                ? '✓ Email resent!'
-                : 'Resend verification email'}
-            </Text>
-          </PressableScale>
-        </MotiView>
+            <View style={s.tipIcon}>
+              <Text style={{ fontSize: 16 }}>🥣</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.tipTitle}>Did you know?</Text>
+              <Text style={s.tipText}>
+                Your GlycoTwin calibrates personalized glycemic responses for South Asian classics like warm whole-wheat roti and spiced lentil daal right after sign-in.
+              </Text>
+            </View>
+          </MotiView>
 
-        {/* Cancel / back to welcome */}
-        <MotiView
-          from={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ type: 'timing', duration: 600, delay: 600 }}
-          style={{ alignItems: 'center', marginTop: 32 }}
-        >
-          <PressableScale onPress={handleCancel} hitSlop={{ top: 12, bottom: 12, left: 40, right: 40 }}>
-            <Text style={s.cancelText}>Cancel — back to Welcome</Text>
-          </PressableScale>
-        </MotiView>
+          {/* Cancel / back to welcome */}
+          <MotiView
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ type: 'timing', duration: 500, delay: 350 }}
+            style={{ alignItems: 'center', marginTop: 20 }}
+          >
+            <PressableScale onPress={handleCancel} hitSlop={{ top: 12, bottom: 12, left: 24, right: 24 }}>
+              <Text style={s.cancelText}>Cancel & use a different email</Text>
+            </PressableScale>
+          </MotiView>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -241,110 +224,184 @@ export default function VerifyEmail() {
 const s = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#0E1726',
+    backgroundColor: '#FFFBF5',
   },
   safe: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 32,
+  },
+  mascotWrapper: {
+    width: 80,
+    height: 80,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 8,
   },
-  // ── Logo (no rings, no glow)
-  logoWrapper: {
-    width: 160,
-    height: 160,
+  mascotRing: {
+    position: 'absolute',
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+    backgroundColor: 'rgba(166,240,185,0.4)',
+  },
+  mascotBadge: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoContainer: {
-    width: 160,
-    height: 160,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  // ── Text
-  brand: {
-    fontFamily: 'PlusJakartaSans_800ExtraBold',
-    fontSize: 36,
-    letterSpacing: -1,
-  },
-  // ── Card
-  card: {
-    marginTop: 40,
-    width: '100%',
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 20,
+    shadowColor: 'rgba(42,168,154,0.18)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: 'rgba(186,202,197,0.1)',
-    padding: 28,
-    alignItems: 'center',
-    gap: 12,
+    borderColor: 'rgba(61,61,61,0.06)',
   },
-  emailIcon: {
-    fontSize: 36,
-    marginBottom: 4,
+  stepTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 9999,
+    backgroundColor: '#FFF5EB',
+    borderWidth: 1,
+    borderColor: 'rgba(61,61,61,0.06)',
+    marginBottom: 16,
+  },
+  stepTagText: {
+    fontFamily: 'Nunito_600SemiBold',
+    fontSize: 12,
+    color: '#006A61',
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(61,61,61,0.06)',
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: 'rgba(61,61,61,0.06)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 14,
+    elevation: 3,
+  },
+  iconBadge: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: '#FFE5D9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+    position: 'relative',
+  },
+  sparkleBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#FFF3CD',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    fontFamily: 'Nunito_800ExtraBold',
     fontSize: 22,
-    color: '#FFF8EA',
+    color: '#3D3D3D',
     textAlign: 'center',
+    marginBottom: 8,
   },
   subtitle: {
-    fontFamily: 'SpaceGrotesk_400Regular',
+    fontFamily: 'Nunito_500Medium',
     fontSize: 14,
-    color: 'rgba(186,202,197,0.65)',
+    color: '#8E8E8E',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 21,
+    marginBottom: 16,
+  },
+  emailHighlight: {
+    fontFamily: 'Nunito_700Bold',
+    color: '#3D3D3D',
+    backgroundColor: '#FFF5EB',
   },
   waitRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 8,
-    backgroundColor: 'rgba(45,212,191,0.08)',
-    borderRadius: 99,
+    backgroundColor: 'rgba(212,245,233,0.5)',
+    borderRadius: 9999,
     paddingHorizontal: 16,
     paddingVertical: 8,
+    marginBottom: 12,
   },
   dot: {
-    width: 7,
-    height: 7,
-    borderRadius: 99,
-    backgroundColor: '#2DD4BF',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#2AA89A',
   },
   waitText: {
-    fontFamily: 'SpaceGrotesk_500Medium',
+    fontFamily: 'Nunito_700Bold',
     fontSize: 13,
-    color: '#2DD4BF',
+    color: '#006A61',
   },
   dots: {
-    fontFamily: 'SpaceGrotesk_500Medium',
+    fontFamily: 'Nunito_700Bold',
     fontSize: 13,
-    color: '#2DD4BF',
-    width: 20,
+    color: '#006A61',
+    width: 18,
   },
-  divider: {
-    width: '100%',
-    height: 1,
-    backgroundColor: 'rgba(186,202,197,0.08)',
-    marginVertical: 4,
-  },
-  linkText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 14,
-    color: '#2DD4BF',
+  helperNotice: {
+    fontFamily: 'Nunito_400Regular',
+    fontSize: 12,
+    color: '#8E8E8E',
+    marginTop: 12,
     textAlign: 'center',
   },
-  linkDisabled: {
-    color: 'rgba(186,202,197,0.4)',
+  tipCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    backgroundColor: '#FFF5EB',
+    borderRadius: 20,
+    padding: 14,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(61,61,61,0.06)',
+  },
+  tipIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'rgba(61,61,61,0.04)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+  },
+  tipTitle: {
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 13,
+    color: '#3D3D3D',
+    marginBottom: 2,
+  },
+  tipText: {
+    fontFamily: 'Nunito_400Regular',
+    fontSize: 12,
+    color: '#8E8E8E',
+    lineHeight: 17,
   },
   cancelText: {
-    fontFamily: 'SpaceGrotesk_400Regular',
+    fontFamily: 'Nunito_600SemiBold',
     fontSize: 13,
-    color: 'rgba(186,202,197,0.4)',
+    color: '#8E8E8E',
     textDecorationLine: 'underline',
   },
 });

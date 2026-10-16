@@ -1,0 +1,2 @@
+# Place downloaded weights here via python scripts/fetch_weights.py
+# (FastSAM-s.pt, depth-anything-v2-small-hf, clip-vit-base-patch32)
