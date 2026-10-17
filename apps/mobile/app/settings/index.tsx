@@ -183,8 +183,8 @@ export default function Settings() {
             />
             <Row
               icon={<Server size={18} color="#006A61" />}
-              label={`Backend: ${isAzure ? 'Azure Cloud VM' : 'Local (port 8000)'}`}
-              onPress={toggleServerUrl}
+              label={`Backend Server (${apiUrl.includes('trycloudflare') ? 'Cloudflare Tunnel' : isAzure ? 'Azure VM' : 'Custom/LAN'})`}
+              onPress={() => router.push('/settings/server' as any)}
             />
             <Row
               icon={<Globe size={18} color="#006A61" />}

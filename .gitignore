@@ -56,4 +56,5 @@ build/
 .expo-shared/
 ios/
 android/
+*.apk
 *.tsbuildinfo
