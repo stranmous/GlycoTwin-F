@@ -5,7 +5,7 @@ import { Platform, StyleSheet, TextInput, KeyboardAvoidingView, ScrollView, I18n
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from 'tamagui';
 import { MotiView } from 'moti';
-import { ChevronLeft, Eye, EyeOff, ShieldAlert } from '@tamagui/lucide-icons';
+import { ChevronLeft, Eye, EyeOff, Server, ShieldAlert } from '@tamagui/lucide-icons';
 import Svg, { Path } from 'react-native-svg';
 
 import { GlowButton } from '../../src/components/motion/GlowButton';
@@ -107,6 +107,7 @@ export default function Login() {
   const router = useRouter();
   const signIn = useAuthStore((s) => s.signIn);
   const setEmailVerified = useAuthStore((s) => s.setEmailVerified);
+  const apiUrl = useAuthStore((s) => s.apiUrl);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -172,27 +173,40 @@ export default function Login() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Back button */}
-          <MotiView
-            from={{ opacity: 0, translateX: isRTL ? 12 : -12 }}
-            animate={{ opacity: 1, translateX: 0 }}
-            transition={{ type: 'spring', damping: 18 }}
-            style={{ alignSelf: 'flex-start' }}
-          >
-            <PressableScale
-              onPress={() => (router.canGoBack() ? router.back() : router.replace('/(auth)/welcome'))}
-              scale={0.92}
-              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+          {/* Top navigation row: Back button & Server selector */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: 4 }}>
+            <MotiView
+              from={{ opacity: 0, translateX: isRTL ? 12 : -12 }}
+              animate={{ opacity: 1, translateX: 0 }}
+              transition={{ type: 'spring', damping: 18 }}
             >
-              <View style={styles.backBtn}>
-                <ChevronLeft
-                  size={20}
-                  color="#3D3D3D"
-                  style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-                />
+              <PressableScale
+                onPress={() => (router.canGoBack() ? router.back() : router.replace('/(auth)/welcome'))}
+                scale={0.92}
+                hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+              >
+                <View style={styles.backBtn}>
+                  <ChevronLeft
+                    size={20}
+                    color="#3D3D3D"
+                    style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
+                  />
+                </View>
+              </PressableScale>
+            </MotiView>
+
+            <PressableScale
+              onPress={() => router.push('/settings/server' as any)}
+              scale={0.94}
+            >
+              <View style={styles.serverPill}>
+                <Server size={13} color="#006A61" />
+                <Text style={styles.serverPillText}>
+                  {apiUrl.includes('trycloudflare') ? 'Cloudflare Tunnel' : apiUrl.includes('azure') ? 'Azure Cloud' : 'Server Settings'}
+                </Text>
               </View>
             </PressableScale>
-          </MotiView>
+          </View>
 
           {/* Friendly Greeting Card */}
           <MotiView
@@ -459,5 +473,21 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito_700Bold',
     fontSize: 14,
     color: '#2AA89A',
+  },
+  serverPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#D4F5E9',
+    borderColor: '#81C995',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  serverPillText: {
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 12,
+    color: '#006A61',
   },
 });

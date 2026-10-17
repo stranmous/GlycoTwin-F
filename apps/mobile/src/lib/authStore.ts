@@ -73,11 +73,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         store.get(API_URL_KEY),
         store.get(LANG_KEY),
       ]);
+      let effectiveApiUrl = savedApiUrl || DEFAULT_API_URL;
+      if (Platform.OS === 'android' && (effectiveApiUrl.includes('localhost') || effectiveApiUrl.includes('10.0.2.2') || effectiveApiUrl.includes('127.0.0.1'))) {
+        effectiveApiUrl = DEFAULT_API_URL;
+      }
       set({
         token: token || null,
         uid: uid || null,
         email: email || null,
-        apiUrl: savedApiUrl || DEFAULT_API_URL,
+        apiUrl: effectiveApiUrl,
         activeLanguage: savedLang || 'en',
         hydrated: true,
       });

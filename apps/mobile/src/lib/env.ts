@@ -7,12 +7,12 @@ export const LOCAL_WIFI_URL = 'http://192.168.20.100:8000';
 export const AZURE_API_URL = 'https://glycotwin-demo.indiasouthcentral.cloudapp.azure.com';
 
 let resolvedUrl = process.env.EXPO_PUBLIC_API_URL;
-if (!resolvedUrl) {
-  if (Platform.OS === 'android') {
+if (Platform.OS === 'android') {
+  if (!resolvedUrl || resolvedUrl.includes('localhost') || resolvedUrl.includes('127.0.0.1') || resolvedUrl.includes('10.0.2.2')) {
     resolvedUrl = CLOUDFLARE_TUNNEL_URL;
-  } else {
-    resolvedUrl = 'http://localhost:8000';
   }
+} else {
+  resolvedUrl = resolvedUrl || 'http://localhost:8000';
 }
 
 export const DEFAULT_API_URL = resolvedUrl;
