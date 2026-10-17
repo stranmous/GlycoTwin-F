@@ -14,6 +14,7 @@ export type UserProfile = {
   medications?: Array<string | { name: string; dose?: string | null; schedule?: string | null; notes?: string | null }> | null;
   hba1c?: number | null;
   display_name?: string | null;
+  sex?: string | null;
   preferred_language?: string;
   active_language?: string;
 };

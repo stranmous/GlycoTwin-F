@@ -13,6 +13,7 @@ import { PressableScale } from '../../src/components/motion/PressableScale';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { OnboardingProgressBar } from '../../src/components/OnboardingProgressBar';
 import { api } from '../../src/lib/apiClient';
+import { useAuthStore } from '../../src/lib/authStore';
 import { useTwinStore } from '../../src/lib/twinStore';
 import type { UserOut } from '../../src/types/api';
 
@@ -37,12 +38,13 @@ export default function Profile() {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { uid } = useAuthStore();
 
   const params = useLocalSearchParams<{ mode?: string }>();
   const isEditMode = params.mode === 'edit';
 
   const { data: user } = useQuery<UserOut>({
-    queryKey: ['me'],
+    queryKey: ['me', uid],
     queryFn: () => api.get('/api/v1/auth/profile'),
   });
 
@@ -105,7 +107,7 @@ export default function Profile() {
         consent_accepted: true,
       };
 
-      await api.put('/api/v1/auth/profile', profileData);
+      const updated = await api.put<UserOut>('/api/v1/auth/profile', profileData);
 
       // Trigger physiological twin calibration upon onboarding profile completion (R2)
       await useTwinStore.getState().calibrateTwin({
@@ -113,8 +115,13 @@ export default function Profile() {
         weight_kg: profileData.weight_kg,
         height_cm: profileData.height_cm,
         diabetes_type: profileData.diabetes_type ?? 'type_2',
+        sex: profileData.sex ?? undefined,
       }).catch(() => {});
 
+      if (updated) {
+        queryClient.setQueryData(['me'], updated);
+        if (uid) queryClient.setQueryData(['me', uid], updated);
+      }
       await queryClient.invalidateQueries({ queryKey: ['me'] });
 
       if (isEditMode) {

@@ -76,10 +76,20 @@ async def upsert_profile(db: AsyncSession, user_id: str, payload: ProfileIn) -> 
             activity_level=payload.activity_level or "moderate",
             medications=payload.medications if payload.medications is not None else [],
             hba1c=payload.hba1c,
+            sex=payload.sex,
         )
         db.add(profile)
     else:
-        profile_fields = ("age", "weight_kg", "height_cm", "diabetes_type", "activity_level", "medications", "hba1c")
+        profile_fields = (
+            "age",
+            "weight_kg",
+            "height_cm",
+            "diabetes_type",
+            "activity_level",
+            "medications",
+            "hba1c",
+            "sex",
+        )
         for field_name in profile_fields:
             if field_name in payload.model_fields_set:
                 setattr(profile, field_name, getattr(payload, field_name))

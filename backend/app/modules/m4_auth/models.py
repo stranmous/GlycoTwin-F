@@ -57,6 +57,7 @@ class MetabolicProfile(Base):
     activity_level: Mapped[str] = mapped_column(EncryptedString)
     medications: Mapped[list] = mapped_column(EncryptedJSON, default=list)
     hba1c: Mapped[float | None] = mapped_column(EncryptedFloat, nullable=True)
+    sex: Mapped[str | None] = mapped_column(EncryptedString, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(UTC),

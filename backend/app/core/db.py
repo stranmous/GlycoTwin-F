@@ -40,3 +40,14 @@ async def init_db() -> None:
 
     async with get_engine().begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+        def _migrate(connection):
+            from sqlalchemy import inspect, text
+            inspector = inspect(connection)
+            tables = inspector.get_table_names()
+            if "metabolic_profiles" in tables:
+                cols = [c["name"] for c in inspector.get_columns("metabolic_profiles")]
+                if "sex" not in cols:
+                    connection.execute(text("ALTER TABLE metabolic_profiles ADD COLUMN sex TEXT"))
+
+        await conn.run_sync(_migrate)

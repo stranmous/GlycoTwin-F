@@ -32,6 +32,7 @@ def _profile_out(profile: MetabolicProfile, user: User) -> ProfileOut:
         bmi=round(bmi, 1),
         display_name=user.display_name,
         email=user.email,
+        sex=profile.sex,
     )
 
 
